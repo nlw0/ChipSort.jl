@@ -20,7 +20,6 @@ function simd_sort_16(a::Vec{16, T}) where T
     a4 = Vec((a[13], a[14], a[15], a[16]))
 
     bb = in_register_sorting(a1, a2, a3, a4)
-    # bitonic_merge_4x4(bb...)
     c1,c2,c3,c4 = bitonic_merge_4x4(bb...)
 
     Vec((c1[1],c1[2],c1[3],c1[4],
@@ -49,48 +48,46 @@ end
     ab1, ab2 = bitonic_merge_2x4(a, b)
     cd1, cd2 = bitonic_merge_2x4(c, d)
 
-    bitonic_merge_2x2x4(ab1, ab2, cd1, cd2)
+    bitonic_merge_2xNx4((ab1, ab2), (cd1, cd2))
 end
 
-@inline function bitonic_merge_2x2x4(ab1::Vec{4, T}, ab2::Vec{4, T}, cd1::Vec{4, T}, cd2::Vec{4, T}) where T
-    e1, ei2 = bitonic_merge_2x4(ab1, cd1)
+# @inline function bitonic_merge_2x2x4(ab1::Vec{4, T}, ab2::Vec{4, T}, cd1::Vec{4, T}, cd2::Vec{4, T}) where T
+#     e1, ei2 = bitonic_merge_2x4(ab1, cd1)
 
-    if ab2[1] < cd2[1]
-        e2, ei3 = bitonic_merge_2x4(ei2, ab2)
-        e3, e4 = bitonic_merge_2x4(ei3, cd2)
-    else
-        e2, ei3 = bitonic_merge_2x4(ei2, cd2)
-        e3, e4 = bitonic_merge_2x4(ei3, ab2)
-    end
-    (e1, e2, e3, e4)
-end
+#     if ab2[1] < cd2[1]
+#         e2, ei3 = bitonic_merge_2x4(ei2, ab2)
+#         e3, e4 = bitonic_merge_2x4(ei3, cd2)
+#     else
+#         e2, ei3 = bitonic_merge_2x4(ei2, cd2)
+#         e3, e4 = bitonic_merge_2x4(ei3, ab2)
+#     end
+#     (e1, e2, e3, e4)
+# end
 
 
-@inline function bitonic_merge_2xNx4(a::NTuple{Na, Vec{4, T}}, b::NTuple{Nb, Vec{4, T}}) where {Na,Nb}
+@inline function bitonic_merge_2xNx4(a::NTuple{Na, Vec{4, T}}, b::NTuple{Nb, Vec{4, T}}) where {T,Na,Nb}
     e1, ei2 = bitonic_merge_2x4(a[1], b[1])
 
+    (e1, bitonic_merge_2xNx4(ei2, a[2:end], b[2:end])...)
 end
 
-@inline function bitonic_merge_2xNx4(c::Vec{4, T}, a::NTuple{Na, Vec{4, T}}, b::NTuple{Nb, Vec{4, T}}) where {Na,Nb}
+@inline function bitonic_merge_2xNx4(c::Vec{4, T}, a::NTuple{0,Vec{4, T}}, b::NTuple{0,Vec{4, T}}) where {T}
+    (c,)
+end
 
-    e1, ei2 = bitonic_merge_2x4(ab1, cd1)
+@inline function bitonic_merge_2xNx4(c::Vec{4, T}, a::NTuple{Na, Vec{4, T}}, b::NTuple{0, Vec{4, T}}) where {T,Na}
+    e1, ei2 = bitonic_merge_2x4(c, a[1])
+    (e1, bitonic_merge_2xNx4(ei2, a[2:end], b)...)
+end
 
-    if ab2[1] < cd2[1]
-        e2, ei3 = bitonic_merge_2x4(ei2, ab2)
-        e3, e4 = bitonic_merge_2x4(ei3, cd2)
+@inline function bitonic_merge_2xNx4(c::Vec{4, T}, a::NTuple{Na, Vec{4, T}}, b::NTuple{Nb, Vec{4, T}}) where {T,Na,Nb}
+    if Na==0 || b[1][1] < a[1][1]
+        bitonic_merge_2xNx4(c, b, a)
     else
-        e2, ei3 = bitonic_merge_2x4(ei2, cd2)
-        e3, e4 = bitonic_merge_2x4(ei3, ab2)
+        e1, ei2 = bitonic_merge_2x4(c, a[1])
+        (e1, bitonic_merge_2xNx4(ei2, a[2:end], b)...)
     end
-    (e1, e2, e3, e4)
-
-
 end
-
-
-
-
-
 
 @inline function bitonic_merge_2x4(a::Vec{4, T}, b::Vec{4, T}) where T
     a1 = a
@@ -189,9 +186,16 @@ function demo_array()
     display(a_in')
 end
 
-T = Int8
-aa = rand(T, 16*16)
+# T = Int8
+# aa = rand(T, 16*16)
 
-display(reshape(aa,16,:))
-simd_sort_in_place(aa)
-display(reshape(aa,16,:))
+# display(reshape(aa,16,:))
+# simd_sort_in_place(aa)
+# display(reshape(aa,16,:))
+
+"""A tuple containing a random sorted sequence, split in n vectors of v elements."""
+rvec(::Type{T}, v, n) where T = tuple(mapslices(x->Vec(tuple(sort(x)...)), reshape(sort(rand(T, v*n)), v,:);dims=1)...)
+
+v1 = rvec(Float32,4,16)
+v2 = rvec(Float32,4,16)
+aa = bitonic_merge_2xNx4(v1, v2)
