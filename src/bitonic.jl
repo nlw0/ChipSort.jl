@@ -3,67 +3,46 @@ using InteractiveUtils
 using Revise
 using SIMD
 
-function simd_sort_in_place(a::Array{T,1}) where T
-    N = size(a, 1) >> 4
+# function simd_sort_in_place(a::Array{T,1}) where T
+#     N = size(a, 1) >> 4
+#     for n in 1:N
+#         aa = vload(Vec{16, T}, a, n * 16 - 15)
+#         qq = simd_sort_16(aa)
+#         vstorent(qq, a, n*16-15)
+#     end
+# end
+
+function simd_sort_in_place(::Val{B}, a::Array{T,1}) where {B,T}
+    N = size(a, 1) >> B
+    M = 2^B
     for n in 1:N
-        aa = vload(Vec{16, T}, a, n * 16 - 15)
-        qq = simd_sort_16(aa)
-        vstorent(qq, a, n*16-15)
+        aa = vload(Vec{M, T}, a, n * M - M+1)
+        qq = simd_sort(aa)
+        qv = Vec(tuple([qq[j][k] for j in 1:(M>>2) for k in 1:4]...))
+        vstorent(qv, a, n*M-M+1)
     end
 end
 
-
-function simd_sort_16(a::Vec{16, T}) where T
-    a1 = Vec((a[1], a[2], a[3], a[4]))
-    a2 = Vec((a[5], a[6], a[7], a[8]))
-    a3 = Vec((a[9], a[10], a[11], a[12]))
-    a4 = Vec((a[13], a[14], a[15], a[16]))
-
-    bb = in_register_sorting(a1, a2, a3, a4)
-    c1,c2,c3,c4 = bitonic_merge_4x4(bb...)
-
-    Vec((c1[1],c1[2],c1[3],c1[4],
-         c2[1],c2[2],c2[3],c2[4],
-         c3[1],c3[2],c3[3],c3[4],
-         c4[1],c4[2],c4[3],c4[4]))
+@inline function simd_sort(qq::Vec{16, T}) where T
+    ai = tuple((Vec(tuple((qq[a + n] for n in 0:3)...)) for a in 1:4:16)...)
+    bitonic_merge_4x1x4(in_register_sorting(ai...)...)
 end
 
-# @inline function bitonic_merge_4x4(a::Vec{4, T}, b::Vec{4, T}, c::Vec{4, T}, d::Vec{4, T}) where T
-#     ab1, ab2 = bitonic_merge_2x4(a, b)
-#     cd1, cd2 = bitonic_merge_2x4(c, d)
+@inline function simd_sort(qq::Vec{N, T}) where N where T
+    ai::Vec{div(N,2), T} = Vec(tuple((qq[n] for n in 1:div(N,2))...))
+    bi::Vec{div(N,2), T} = Vec(tuple((qq[n] for n in (1+div(N,2)):N)...))
 
-#     e1, ei2 = bitonic_merge_2x4(ab1, cd1)
+    aa = simd_sort(ai)
+    bb = simd_sort(bi)
+    bitonic_merge_2xNx4(aa, bb)
+end
 
-#     if ab2[1] < cd2[1]
-#         e2, ei3 = bitonic_merge_2x4(ei2, ab2)
-#         e3, e4 = bitonic_merge_2x4(ei3, cd2)
-#     else
-#         e2, ei3 = bitonic_merge_2x4(ei2, cd2)
-#         e3, e4 = bitonic_merge_2x4(ei3, ab2)
-#     end
-#     (e1, e2, e3, e4)
-# end
-
-@inline function bitonic_merge_4x4(a::Vec{4, T}, b::Vec{4, T}, c::Vec{4, T}, d::Vec{4, T}) where T
+@inline function bitonic_merge_4x1x4(a::Vec{4, T}, b::Vec{4, T}, c::Vec{4, T}, d::Vec{4, T}) where T
     ab1, ab2 = bitonic_merge_2x4(a, b)
     cd1, cd2 = bitonic_merge_2x4(c, d)
 
     bitonic_merge_2xNx4((ab1, ab2), (cd1, cd2))
 end
-
-# @inline function bitonic_merge_2x2x4(ab1::Vec{4, T}, ab2::Vec{4, T}, cd1::Vec{4, T}, cd2::Vec{4, T}) where T
-#     e1, ei2 = bitonic_merge_2x4(ab1, cd1)
-
-#     if ab2[1] < cd2[1]
-#         e2, ei3 = bitonic_merge_2x4(ei2, ab2)
-#         e3, e4 = bitonic_merge_2x4(ei3, cd2)
-#     else
-#         e2, ei3 = bitonic_merge_2x4(ei2, cd2)
-#         e3, e4 = bitonic_merge_2x4(ei3, ab2)
-#     end
-#     (e1, e2, e3, e4)
-# end
-
 
 @inline function bitonic_merge_2xNx4(a::NTuple{Na, Vec{4, T}}, b::NTuple{Nb, Vec{4, T}}) where {T,Na,Nb}
     e1, ei2 = bitonic_merge_2x4(a[1], b[1])
@@ -89,6 +68,16 @@ end
     end
 end
 
+function test_merge()
+    """A tuple containing a random sorted sequence, split in n vectors of v elements."""
+    rvec(::Type{T}, v, n) where T = tuple(mapslices(x->Vec(tuple(sort(x)...)), reshape(sort(rand(T, v*n)), v,:);dims=1)...)
+
+    v1 = rvec(Float32,4,16)
+    v2 = rvec(Float32,4,16)
+    aa = bitonic_merge_2xNx4(v1, v2)
+end
+
+"""The fundamental 4-elements bitonic merge kernel"""
 @inline function bitonic_merge_2x4(a::Vec{4, T}, b::Vec{4, T}) where T
     a1 = a
     b1 = shufflevector(b, Val{(3,2,1,0)})
@@ -157,7 +146,7 @@ function demo_stages()
     aa = [Vec(tuple(a_orig[k*4-3:k*4]...)) for k in 1:4]
 
     qq = in_register_sorting(aa...)
-    jj = bitonic_merge_4x4(qq...)
+    jj = bitonic_merge_4x1x4(qq...)
 
     a_sort_mine = [jj[j][k] for j in 1:4 for k in 1:4]
     a_sort_ref = sort(a_orig)
@@ -186,16 +175,9 @@ function demo_array()
     display(a_in')
 end
 
-# T = Int8
-# aa = rand(T, 16*16)
+T = UInt8
+aa = rand(T, 16*16)
 
-# display(reshape(aa,16,:))
-# simd_sort_in_place(aa)
-# display(reshape(aa,16,:))
-
-"""A tuple containing a random sorted sequence, split in n vectors of v elements."""
-rvec(::Type{T}, v, n) where T = tuple(mapslices(x->Vec(tuple(sort(x)...)), reshape(sort(rand(T, v*n)), v,:);dims=1)...)
-
-v1 = rvec(Float32,4,16)
-v2 = rvec(Float32,4,16)
-aa = bitonic_merge_2xNx4(v1, v2)
+display(reshape(aa,32,:))
+simd_sort_in_place(Val(5), aa)
+display(reshape(aa,32,:))
