@@ -1,6 +1,6 @@
 using InteractiveUtils
 
-using Revise
+# using Revise
 using SIMD
 
 # function simd_sort_in_place(a::Array{T,1}) where T
@@ -19,18 +19,22 @@ function simd_sort_in_place(::Val{B}, a::Array{T,1}) where {B,T}
         aa = vload(Vec{M, T}, a, n * M - M+1)
         qq = simd_sort(aa)
         qv = Vec(tuple([qq[j][k] for j in 1:(M>>2) for k in 1:4]...))
+        println(qv)
         vstorent(qv, a, n*M-M+1)
     end
 end
 
 @inline function simd_sort(qq::Vec{16, T}) where T
-    ai = tuple((Vec(tuple((qq[a + n] for n in 0:3)...)) for a in 1:4:16)...)
+    ai = (Vec((qq[1], qq[2],qq[3], qq[4])),
+          Vec((qq[5], qq[6],qq[7], qq[8])),
+          Vec((qq[9], qq[10],qq[11], qq[12])),
+          Vec((qq[13], qq[14],qq[15], qq[16])))
     bitonic_merge_4x1x4(in_register_sorting(ai...)...)
 end
 
-@inline function simd_sort(qq::Vec{N, T}) where N where T
-    ai::Vec{div(N,2), T} = Vec(tuple((qq[n] for n in 1:div(N,2))...))
-    bi::Vec{div(N,2), T} = Vec(tuple((qq[n] for n in (1+div(N,2)):N)...))
+function simd_sort(qq::Vec{N, T}) where {N,T}
+    ai = Vec(tuple((qq[n] for n in 1:div(N,2))...))
+    bi = Vec(tuple((qq[n] for n in (1+div(N,2)):N)...))
 
     aa = simd_sort(ai)
     bb = simd_sort(bi)
@@ -175,9 +179,10 @@ function demo_array()
     display(a_in')
 end
 
-T = UInt8
-aa = rand(T, 16*16)
+TT = Int32
+aa = rand(TT, 16*16);
 
 display(reshape(aa,32,:))
-simd_sort_in_place(Val(5), aa)
+# @code_native simd_sort_in_place(Val(6), aa)
+simd_sort_in_place(Val(6), aa)
 display(reshape(aa,32,:))
