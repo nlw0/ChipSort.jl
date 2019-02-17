@@ -1,25 +1,10 @@
-# @inline function sort4(a1::Vec{4, T}, a2::Vec{4, T}, a3::Vec{4, T}, a4::Vec{4, T}) where T
-#     b1 = min(a1,a2)
-#     b2 = max(a1,a2)
-#     b3 = min(a3,a4)
-#     b4 = max(a3,a4)
+using SIMD
 
-#     c1 = min(b1,b3)
-#     c3 = max(b1,b3)
-#     c2 = min(b2,b4)
-#     c4 = max(b2,b4)
-
-#     d2 = min(c2,c3)
-#     d3 = max(c2,c3)
-
-#     (c1, d2, d3, c4)
-# end
-
-function nested_calls(name, n)
+function nested_calls(name, n, input)
     if n == 0
-        :input
+        input
     else
-        Expr(:call, Symbol(name,n) , nested_calls(name, n-1))
+        Expr(:call, Symbol(name, n) , nested_calls(name, n-1, input))
     end
 end
 
@@ -88,19 +73,47 @@ for nn in 1:length(nets)
         eval(Expr(:(=),
                   Expr(:call, Symbol("sort_", inlen, "_step_", st), :input),
                   Expr(:call, :tuple, aa...)))
-        eval(Expr(:(=),
-                  Expr(:call, Symbol("sort_", inlen), :input),
-                  nested_calls("sort_$(inlen)_step_", nsteps)))
+        function_declaration = Expr(
+            :(=),
+            Expr(:call, Symbol("sort_", inlen), :input),
+            Expr(:block, LineNumberNode(123), nested_calls("sort_$(inlen)_step_", nsteps, :input))
+        )
+
+        # eval(function_declaration)
+        eval(
+            Expr(:macrocall, Symbol("@inline"), LineNumberNode(101), function_declaration)
+        )
     end
 end
 
-for x in 1:100000
-    aa = sort_4(rand(4))
-    @assert all(aa[2:end] .> aa[1:end-1])
-    aa = sort_8(rand(8))
-    @assert all(aa[2:end] .> aa[1:end-1])
-    aa = sort_16(rand(16))
-    @assert all(aa[2:end] .> aa[1:end-1])
-    aa = sort_32(rand(32))
-    @assert all(aa[2:end] .> aa[1:end-1])
+function run_test()
+    for p in 2:5
+        n = 2^p
+        ee = Expr(:call, Symbol("sort_", n), :(rand($n)))
+        println(ee)
+        for x in 1:100000
+            aa = eval(ee)
+            @assert all(aa[2:end] .> aa[1:end-1])
+        end
+    end
 end
+
+
+# aa = rand(Int64, 16)
+# @code_native sort_16(aa)
+
+# T = UInt32
+T = Int16
+N = 8
+a_in = rand(T, N*N)
+display(a_in')
+aa = ntuple(i->vload(Vec{N, T}, a_in, i*N-(N-1)), N)
+qq = sort_8(aa)
+@code_native sort_8_step_2(aa)
+
+
+# [0,1,2,3]
+# [4,5,6,7]
+
+# [0,1,4,5]
+# [2,3,6,7]
