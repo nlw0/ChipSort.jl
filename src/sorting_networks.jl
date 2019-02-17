@@ -86,6 +86,36 @@ for nn in 1:length(nets)
     end
 end
 
+
+function gen_net_code(inlen, net_params)
+    nsteps = length(net_params)
+
+    for st in 1:nsteps
+
+        aa = []
+        touched = [x for t in net_params[st] for x in t]
+        untouched = setdiff(1:inlen, touched)
+
+        for t in untouched
+            a1 = Symbol("input_", st-1, "_", t)
+            b1 = Symbol("input_", st, "_", t)
+            push!(aa, :($b1 = $a1))
+        end
+
+        for t in net_params[st]
+            a1 = Symbol("input_", st-1, "_", t[1])
+            a2 = Symbol("input_", st-1, "_", t[2])
+            b1 = Symbol("input_", st, "_", t[1])
+            b2 = Symbol("input_", st, "_", t[2])
+            push!(aa, :($b1 = min($a1,$a2)))
+            push!(aa, :($b1 = max($a1,$a2)))
+        end
+        println(aa)
+    end
+end
+
+gen_net_code(nets[1]...)
+
 function run_test()
     for p in 2:5
         n = 2^p
@@ -103,13 +133,13 @@ end
 # @code_native sort_16(aa)
 
 # T = UInt32
-T = Int16
-N = 8
-a_in = rand(T, N*N)
-display(a_in')
-aa = ntuple(i->vload(Vec{N, T}, a_in, i*N-(N-1)), N)
-qq = sort_8(aa)
-@code_native sort_8_step_2(aa)
+# T = Int16
+# N = 8
+# a_in = rand(T, N*N)
+# display(a_in')
+# aa = ntuple(i->vload(Vec{N, T}, a_in, i*N-(N-1)), N)
+# qq = sort_8(aa)
+# @code_native sort_8_step_2(aa)
 
 
 # [0,1,2,3]
