@@ -8,6 +8,7 @@ function nested_calls(name, n, input)
     end
 end
 
+
 # Networks found by Bose-Nelson algorithm, except for N=16
 # http://pages.ripco.net/~jgamble/nw.html
 # http://www.cs.brandeis.edu/~hugues/sorting_networks.html
@@ -60,36 +61,8 @@ nets = (
     ))
 )
 
-for nn in 1:length(nets)
-    inlen, net_params = nets[nn]
-    nsteps = length(net_params)
-
-    for st in 1:nsteps
-        aa = [:(@inbounds input[$n]) for n in 1:inlen]
-        for t in net_params[st]
-            aa[t[1]] = :(@inbounds min(input[$(t[1])],input[$(t[2])]))
-            aa[t[2]] = :(@inbounds max(input[$(t[1])],input[$(t[2])]))
-        end
-        eval(Expr(:(=),
-                  Expr(:call, Symbol("sort_", inlen, "_step_", st), :input),
-                  Expr(:call, :tuple, aa...)))
-        function_declaration = Expr(
-            :(=),
-            Expr(:call, Symbol("sort_", inlen), :input),
-            Expr(:block, LineNumberNode(123), nested_calls("sort_$(inlen)_step_", nsteps, :input))
-        )
-
-        # eval(function_declaration)
-        eval(
-            Expr(:macrocall, Symbol("@inline"), LineNumberNode(101), function_declaration)
-        )
-    end
-end
-
-
 function gen_net_code(inlen, net_params)
     nsteps = length(net_params)
-
 
     aa = Expr(:block)
 
@@ -121,23 +94,20 @@ function gen_net_code(inlen, net_params)
 
     push!(aa.args,
           Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), inlen)...))
-    println(aa)
 
     function_declaration = Expr(
         :(=),
-        Expr(:call, Symbol("sort_", inlen), :input), aa
-#        Expr(:block, LineNumberNode(123), nested_calls("sort_$(inlen)_step_", nsteps, :input))
+        Expr(:call, Symbol("sort_", inlen), :input),
+        aa
     )
-
-        # eval(function_declaration)
-        eval(
-            Expr(:macrocall, Symbol("@inline"), LineNumberNode(101), function_declaration)
-        )
-
-
+    eval(
+        Expr(:macrocall, Symbol("@inline"), LineNumberNode(63), function_declaration)
+    )
 end
 
-gen_net_code(nets[3]...)
+for sn in nets
+    gen_net_code(sn...)
+end
 
 function run_test()
     for p in 2:5
@@ -150,23 +120,83 @@ function run_test()
         end
     end
 end
+# run_test()
 
+mylog(n) = if n == 1 0 else 1 + mylog(n>>1) end
 
-# aa = rand(Int64, 16)
-# @code_native sort_16(aa)
+function gen_transpose_code(len)
 
+    aa = Expr(:block)
+
+    pa = Val{ntuple(a->((a-1)*len)%(2*len-1), len)}
+    pb = Val{ntuple(a->div(len,2)+((a-1)*len)%(2*len-1), len)}
+
+    for t in 1:len
+        a1 = Symbol("input_", 0, "_", t)
+        push!(aa.args, :($a1 = input[$t]))
+    end
+
+    nsteps = mylog(len)
+
+    len_2 = div(len,2)
+
+    for st in 1:nsteps
+        for t in 1:len_2
+            a1 = Symbol("input_", st-1, "_", t)
+            a2 = Symbol("input_", st-1, "_", t+len_2)
+            b1 = Symbol("input_", st, "_", t*2-1)
+            b2 = Symbol("input_", st, "_", t*2)
+            push!(aa.args, :($b1 = shufflevector($a1, $a2, $pa)))
+            push!(aa.args, :($b2 = shufflevector($a1, $a2, $pb)))
+        end
+    end
+
+    push!(aa.args,
+          Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), len)...))
+
+    function_declaration = Expr(
+        :(=),
+        Expr(:call, Symbol("transpose_", len), :input),
+        aa
+    )
+    eval(
+        Expr(:macrocall, Symbol("@inline"), LineNumberNode(63), function_declaration)
+    )
+end
+
+for n in 2:5
+    gen_transpose_code(2^n)
+end
+
+function test_trans(n)
+    uu = ntuple(a->Vec(ntuple(i->convert(Int16, a*100+i), n)), n)
+    tt = ntuple(a->Vec(ntuple(i->convert(Int16, i*100+a), n)), n)
+    ee = Expr(:call, Symbol("transpose_", n), :($uu))
+    tthat = eval(ee)
+    @assert all(all(j) for j in (tthat.==tt))
+end
+
+# for n in 2:5
+#     test_trans(2^n)
+# end
+
+# T = Float64
+# T = Float16
+# T = Float16
 # T = UInt32
 T = Int16
 N = 16
-a_in = rand(T, N*N)
-display(a_in')
+a_in = rand(T, N * N)
+a_out = Array{T}(undef, N * N)
+display(reshape(a_in,N,N))
 aa = ntuple(i->vload(Vec{N, T}, a_in, i*N-(N-1)), N)
-qq = sort_16(aa)
-# @code_native sort_16(aa)
+
+qq = transpose_16(sort_16(aa))
+
+for i in 1:N
+    vstore(qq[i], a_out, i*N-(N-1))
+end
+display(reshape(a_out, N, N))
 
 
-# [0,1,2,3]
-# [4,5,6,7]
-
-# [0,1,4,5]
-# [2,3,6,7]
+# @code_native sort_32(aa)
