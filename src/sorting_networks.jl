@@ -90,16 +90,23 @@ end
 function gen_net_code(inlen, net_params)
     nsteps = length(net_params)
 
+
+    aa = Expr(:block)
+
+    for t in 1:inlen
+        a1 = Symbol("input_", 0, "_", t)
+        push!(aa.args, :($a1 = input[$t]))
+    end
+
     for st in 1:nsteps
 
-        aa = []
         touched = [x for t in net_params[st] for x in t]
         untouched = setdiff(1:inlen, touched)
 
         for t in untouched
             a1 = Symbol("input_", st-1, "_", t)
             b1 = Symbol("input_", st, "_", t)
-            push!(aa, :($b1 = $a1))
+            push!(aa.args, :($b1 = $a1))
         end
 
         for t in net_params[st]
@@ -107,14 +114,30 @@ function gen_net_code(inlen, net_params)
             a2 = Symbol("input_", st-1, "_", t[2])
             b1 = Symbol("input_", st, "_", t[1])
             b2 = Symbol("input_", st, "_", t[2])
-            push!(aa, :($b1 = min($a1,$a2)))
-            push!(aa, :($b1 = max($a1,$a2)))
+            push!(aa.args, :($b1 = min($a1, $a2)))
+            push!(aa.args, :($b2 = max($a1, $a2)))
         end
-        println(aa)
     end
+
+    push!(aa.args,
+          Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), inlen)...))
+    println(aa)
+
+    function_declaration = Expr(
+        :(=),
+        Expr(:call, Symbol("sort_", inlen), :input), aa
+#        Expr(:block, LineNumberNode(123), nested_calls("sort_$(inlen)_step_", nsteps, :input))
+    )
+
+        # eval(function_declaration)
+        eval(
+            Expr(:macrocall, Symbol("@inline"), LineNumberNode(101), function_declaration)
+        )
+
+
 end
 
-gen_net_code(nets[1]...)
+gen_net_code(nets[3]...)
 
 function run_test()
     for p in 2:5
@@ -133,13 +156,13 @@ end
 # @code_native sort_16(aa)
 
 # T = UInt32
-# T = Int16
-# N = 8
-# a_in = rand(T, N*N)
-# display(a_in')
-# aa = ntuple(i->vload(Vec{N, T}, a_in, i*N-(N-1)), N)
-# qq = sort_8(aa)
-# @code_native sort_8_step_2(aa)
+T = Int16
+N = 16
+a_in = rand(T, N*N)
+display(a_in')
+aa = ntuple(i->vload(Vec{N, T}, a_in, i*N-(N-1)), N)
+qq = sort_16(aa)
+# @code_native sort_16(aa)
 
 
 # [0,1,2,3]
