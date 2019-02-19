@@ -184,19 +184,34 @@ end
 # T = Float16
 # T = Float16
 # T = UInt32
-T = Int16
+T = Int32
 N = 16
-a_in = rand(T, N * N)
-a_out = Array{T}(undef, N * N)
-display(reshape(a_in,N,N))
-aa = ntuple(i->vload(Vec{N, T}, a_in, i*N-(N-1)), N)
+M = 8
+a_in = rand(T, N * M)
+a_out = Array{T}(undef, N * M)
+display(reshape(a_in,N,M))
+aa = ntuple(i->vload(Vec{M, T}, a_in, i*M-(M-1)), N)
 
-qq = transpose_16(sort_16(aa))
+sr = sort_16(aa)
+qq = (transpose_8(sr[1:M])..., transpose_8(sr[M+1:2*M])...)
 
-for i in 1:N
-    vstore(qq[i], a_out, i*N-(N-1))
+for i in 1:M
+    vstorent(qq[i], a_out, i*N-(N-1))
+    vstorent(qq[i+M], a_out, i*N-(N-1)+M)
 end
-display(reshape(a_out, N, N))
+display(reshape(a_out, N, M))
+
+
+function hh(x)
+    sr = sort_16(x)
+    (transpose_8(ntuple(a->sr[a], 8))...,
+     transpose_8(ntuple(a->sr[a+8], 8)))
+end
+
+# hh(x) = transpose_8(sort_8(x))
+# @code_native transpose_8(aa)
+# @code_native sort_16(aa)
+# @code_native hh(aa)
 
 
 # @code_native sort_32(aa)
