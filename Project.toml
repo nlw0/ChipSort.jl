@@ -2,3 +2,12 @@ name = "MergeSortSIMD"
 uuid = "03bfe0ec-2d70-11e9-07e6-efc00b1ef375"
 authors = ["nic <nwerneck@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+SIMD = "fdea26ae-647d-5447-a871-4b548cad5224"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
