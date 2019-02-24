@@ -14,12 +14,11 @@ function test_merge_types_sizes(T, N)
     @test all(ab[2:end] .>= ab[1:end-1])
 end
 
-
-# @testset for T in [Int8, Int16, Int32, Int64, Float32, Float64]
-#     for N in 2 .^ (1:3)
-#         test_merge_types_sizes(T, N)
-#     end
-# end
+@testset for T in [Int8, Int16, Int32, Int64, Float32, Float64]
+    for N in 2 .^ (1:3)
+        test_merge_types_sizes(T, N)
+    end
+end
 
 
 function test_merge_heaviside(N, Na, Nb)
@@ -31,14 +30,14 @@ function test_merge_heaviside(N, Na, Nb)
     @test all(ab[Na+Nb+1:end] .== 1)
 end
 
+@testset for N in 2 .^ (1:8)
+    for Na in 0:N
+        for Nb in 0:N
+            test_merge_heaviside(N, Na, Nb)
+        end
+    end
+end
 
-# @testset for N in 2 .^ (1:8)
-#     for Na in 0:N
-#         for Nb in 0:N
-#             test_merge_heaviside(N, Na, Nb)
-#         end
-#     end
-# end
 
 function test_merge_brave(T, N)
     T=Int64

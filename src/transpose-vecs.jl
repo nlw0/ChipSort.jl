@@ -1,9 +1,6 @@
 using SIMD
 
 
-mylog(n) = if n == 1 0 else 1 + mylog(n>>1) end
-
-
 @generated function transpose_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}
 
     ex = Expr[Expr(:meta, :inline)]

@@ -4,9 +4,6 @@
 using SIMD
 
 
-mylog(n) = if n == 1 0 else 1 + mylog(n>>1) end
-
-
 function inverse_shuffle(tt)
     out = copy(tt)
     for n in 1:length(tt)

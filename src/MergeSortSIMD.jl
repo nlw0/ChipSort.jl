@@ -2,6 +2,7 @@ module MergeSortSIMD
 
 export sort_net, transpose_vecs, bitonic_merge, merge_multiple_vecs
 
+include("utils.jl")
 include("sorting-networks.jl")
 include("transpose-vecs.jl")
 include("bitonic-merge-network.jl")
