@@ -71,59 +71,6 @@ function run_test()
 end
 # run_test()
 
-mylog(n) = if n == 1 0 else 1 + mylog(n>>1) end
-
-function gen_transpose_code(len)
-
-    aa = Expr(:block)
-
-    pa = Val{ntuple(a->((a-1)*len)%(2*len-1), len)}
-    pb = Val{ntuple(a->div(len,2)+((a-1)*len)%(2*len-1), len)}
-
-    for t in 1:len
-        a1 = Symbol("input_", 0, "_", t)
-        push!(aa.args, :($a1 = input[$t]))
-    end
-
-    nsteps = mylog(len)
-
-    len_2 = div(len,2)
-
-    for st in 1:nsteps
-        for t in 1:len_2
-            a1 = Symbol("input_", st-1, "_", t)
-            a2 = Symbol("input_", st-1, "_", t+len_2)
-            b1 = Symbol("input_", st, "_", t*2-1)
-            b2 = Symbol("input_", st, "_", t*2)
-            push!(aa.args, :($b1 = shufflevector($a1, $a2, $pa)))
-            push!(aa.args, :($b2 = shufflevector($a1, $a2, $pb)))
-        end
-    end
-
-    push!(aa.args,
-          Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), len)...))
-
-    function_declaration = Expr(
-        :(=),
-        Expr(:call, Symbol("transpose_", len), :input),
-        aa
-    )
-    eval(
-        Expr(:macrocall, Symbol("@inline"), LineNumberNode(63), function_declaration)
-    )
-end
-
-for n in 2:5
-    gen_transpose_code(2^n)
-end
-
-function test_trans(n)
-    uu = ntuple(a->Vec(ntuple(i->convert(Int16, a*100+i), n)), n)
-    tt = ntuple(a->Vec(ntuple(i->convert(Int16, i*100+a), n)), n)
-    ee = Expr(:call, Symbol("transpose_", n), :($uu))
-    tthat = eval(ee)
-    @assert all(all(j) for j in (tthat.==tt))
-end
 
 # for n in 2:5
 #     test_trans(2^n)
