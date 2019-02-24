@@ -76,30 +76,9 @@ end
 end
 
 
-## Function draft based on arrays
-#
-# function bitonic_network(la, lb)
-#     G = size(la, 1)
-#     lb = lb[end:-1:1]
-#     L = min.(la, lb)
-#     H = max.(la, lb)
-#     p = mylog(G)
-#     for n in 1:p
-#         ih = inverse_shuffle(bitonic_step(2^(n), 2^(p-n+1)))
-#         sh = bitonic_step(2^(n+1), 2^(p-n))
-#         la = [L;H][ih[sh[1:G]]]
-#         lb = [L;H][ih[sh[(G+1):end]]]
-#         L = min.(la, lb)
-#         H = max.(la, lb)
-#     end
-#     ih = inverse_shuffle(bitonic_step(2G, 1))
-#     la = [L;H][ih[1:G]]
-#     lb = [L;H][ih[(G+1):end]]
-#     la, lb
-# end
-
 ## These "brave" functions merge 4 and 8 vectors. Relies on SIMD.jls great ability to handle large vectors.
-@inline function merge_brave(input::Vararg{Vec{N,T}, 4}) where {N,T}
+## Performance not yet tested.
+@inline function merge_multiple_vecs(input::Vararg{Vec{N,T}, 4}) where {N,T}
     srt1 = bitonic_merge(input[1], input[2])
     i1 = Vec(tuple(ntuple(n->srt1[1][n], N)..., ntuple(n->srt1[2][n], N)...))
     srt2 = bitonic_merge(input[3], input[4])
@@ -108,7 +87,7 @@ end
     Vec(tuple(ntuple(n->srt3[1][n], N * 2)..., ntuple(n->srt3[2][n], N * 2)...))
 end
 
-@inline function merge_brave(input::Vararg{Vec{N,T}, 8}) where {N,T}
+@inline function merge_multiple_vecs(input::Vararg{Vec{N,T}, 8}) where {N,T}
     srt1 = bitonic_merge(input[1], input[2])
     i1 = Vec(tuple(ntuple(n->srt1[1][n], N)..., ntuple(n->srt1[2][n], N)...))
     srt2 = bitonic_merge(input[3], input[4])
