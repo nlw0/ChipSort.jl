@@ -1,6 +1,7 @@
 using Test
 
-include("../src/sorting-networks.jl")
+using SIMD
+using MergeSortSIMD
 
 function test_sorting_networks(T, N)
     vv = rand(T, N)
@@ -46,7 +47,6 @@ end
 
 
 function test_sort_heaviside(N, Na)
-    # va = Vec(ntuple(n->if n<=Na 0x0 else 0x1 end, N))
     va = ntuple(n->if (Na&(1<<(n-1))) > 0 1 else 0 end, N)
     srthat = sort_net(va...)
     srtref = sort([va...])
