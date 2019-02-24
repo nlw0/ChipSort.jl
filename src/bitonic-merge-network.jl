@@ -28,6 +28,7 @@ end
     pat = Val{ntuple(x->N-x, N)}
 
     ex = [
+        Expr(:meta, :inline),
         :(la_0 = input_a),
         :(lb_0 = shufflevector(input_b, $pat)),
         :(L_0 = min(la_0, lb_0)),
@@ -96,3 +97,32 @@ end
 #     lb = [L;H][ih[(G+1):end]]
 #     la, lb
 # end
+
+## These "brave" functions merge 4 and 8 vectors. Relies on SIMD.jls great ability to handle large vectors.
+@inline function merge_brave(input::Vararg{Vec{N,T}, 4}) where {N,T}
+    srt1 = bitonic_merge(input[1], input[2])
+    i1 = Vec(tuple(ntuple(n->srt1[1][n], N)..., ntuple(n->srt1[2][n], N)...))
+    srt2 = bitonic_merge(input[3], input[4])
+    i2 = Vec(tuple(ntuple(n->srt2[1][n], N)..., ntuple(n->srt2[2][n], N)...))
+    srt3 = bitonic_merge(i1,i2)
+    Vec(tuple(ntuple(n->srt3[1][n], N * 2)..., ntuple(n->srt3[2][n], N * 2)...))
+end
+
+@inline function merge_brave(input::Vararg{Vec{N,T}, 8}) where {N,T}
+    srt1 = bitonic_merge(input[1], input[2])
+    i1 = Vec(tuple(ntuple(n->srt1[1][n], N)..., ntuple(n->srt1[2][n], N)...))
+    srt2 = bitonic_merge(input[3], input[4])
+    i2 = Vec(tuple(ntuple(n->srt2[1][n], N)..., ntuple(n->srt2[2][n], N)...))
+    srt3 = bitonic_merge(input[5], input[6])
+    i3 = Vec(tuple(ntuple(n->srt3[1][n], N)..., ntuple(n->srt3[2][n], N)...))
+    srt4 = bitonic_merge(input[7], input[8])
+    i4 = Vec(tuple(ntuple(n->srt4[1][n], N)..., ntuple(n->srt4[2][n], N)...))
+
+    srt5 = bitonic_merge(i1, i2)
+    j1 = Vec(tuple(ntuple(n->srt5[1][n], N * 2)..., ntuple(n->srt5[2][n], N * 2)...))
+    srt6 = bitonic_merge(i3, i4)
+    j2 = Vec(tuple(ntuple(n->srt6[1][n], N * 2)..., ntuple(n->srt6[2][n], N * 2)...))
+
+    srt7 = bitonic_merge(j1, j2)
+    Vec(tuple(ntuple(n->srt7[1][n], N * 4)..., ntuple(n->srt7[2][n], N * 4)...))
+end
