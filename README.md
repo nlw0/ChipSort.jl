@@ -15,19 +15,24 @@ Algorithms like Quicksort dominated sorting benchmarks for years, but they tend 
 
 ## Methodology
 
-The strategy used in ChipSort has two stages.
+The strategy used in ChipSort has two stages, but only the first one is necessary if the array is small enough.
 
-For small arrays, non-branching and SIMD friendly sorting and bitonic merge networks are used. For larger arrays, the first stage is to employ these techniques to create many small ordered sequences.
+For small arrays, the strategy is to use non-branching and SIMD-friendly sorting and bitonic merge networks. This is pretty much the best that can be done in this case, and even a Quicksort implementation will switch to something like this when the array is small enough. One important detail is that in this situation we try our best to load the input data into the processor registers, and do as much as we can there before putting any data back into memory. At this step we are sorting only _in the chip_.
+
+For larger arrays, the first stage is to employ these techniques to create many small ordered sequences. The size of what is considered small is how much data we can fit in the register memory before we start having to move (too much) stuff to the stack in order to carry out the sorting network calculations. Modern processors can already offer kilobytes of register memory.
 
 The second stage is just to perform a multi-way merge of all these small sequences. We really merge many sequences at the same time, using small buffers that are merged with the bitonic merge network. This procedure requires us to keep a large binary tree of intermediate merged sub-sequences, which is supposed to fit in the cache memory.
 
 With this approach, only two passes trough the whole data are necessary. If the array is so large that the merge tree is too big for the cache, we just perform more multi-way merge stages with increasingly larger chunks.
+
 
 ## Implementation
 
 One interesting feature of ChipSort is the heavy use of meta-programming. Our implementation of the sorting network, bitonic merge network and matrix transpose are based on generated functions.
 
 This library relies on SIMD.jl whenever necessary. In special, the `shufflevector` function is used in the transpose and bitonic merge, but the sorting network just uses the `min` and `max` functions, which are supported by the `Vec` class.
+
+One important detail is that non-temporal memory access is used to prevent cache pollution and improve writing throughput.
 
 ## References
 
