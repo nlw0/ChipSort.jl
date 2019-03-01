@@ -10,7 +10,7 @@ Processing power in computers has been growing faster than memory bandwidth for 
 - Access memory as little and sequentially as possible
 - Make use of cache memory
 
-Algorithms like Quicksort dominated sorting benchmarks for years, but they tend to result in more and less ordered accesses to main memory. Interestingly, this means merge-sort, which was suitable for linear media like punched cards and magnetic tapes, became hip again. This and other considerations were taken in account when developing ChipSort.
+Algorithms like Quicksort dominated sorting benchmarks for years, but they tend to result in too frequent and unordered accesses to main memory. Interestingly, this means merge-sort, which was suitable for linear media like punched cards and magnetic tapes, became hip again. This and other considerations were taken in account when developing ChipSort.
 
 
 ## Methodology
