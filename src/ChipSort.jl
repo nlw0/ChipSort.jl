@@ -1,4 +1,4 @@
-module MergeSortSIMD
+module ChipSort
 
 export sort_net, transpose_vecs, bitonic_merge, merge_multiple_vecs, DataBuffer, MergeNode, pop
 

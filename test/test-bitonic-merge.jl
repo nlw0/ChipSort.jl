@@ -1,6 +1,6 @@
 using Test
 
-using MergeSortSIMD
+using ChipSort
 using SIMD
 
 

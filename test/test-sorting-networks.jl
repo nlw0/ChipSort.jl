@@ -1,7 +1,7 @@
 using Test
 
 using SIMD
-using MergeSortSIMD
+using ChipSort
 
 function test_sorting_networks(T, N)
     vv = rand(T, N)

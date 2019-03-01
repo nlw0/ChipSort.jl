@@ -1,4 +1,4 @@
-name = "MergeSortSIMD"
+name = "ChipSort"
 uuid = "03bfe0ec-2d70-11e9-07e6-efc00b1ef375"
 authors = ["nic <nwerneck@gmail.com>"]
 version = "0.1.0"

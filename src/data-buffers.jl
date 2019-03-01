@@ -1,5 +1,5 @@
 using SIMD
-using MergeSortSIMD
+using ChipSort
 
 
 abstract type AbstractDataStream end

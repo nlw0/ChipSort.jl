@@ -1,6 +1,6 @@
 using Test
 using SIMD
-using MergeSortSIMD
+using ChipSort
 
 
 function test_data_buffer(T, ::Val{N}) where N
