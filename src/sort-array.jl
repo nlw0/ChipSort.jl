@@ -5,14 +5,14 @@ using Revise
 using ChipSort
 
 sort_small_array(chunk, ::Val{N}, ::Val{L}) where {L,N} =
-    merge_multiple_vecs(transpose_vecs(sort_net(ntuple(l->vload(Vec{N, T}, chunk, 1+(l-1)*N), L)...)...)...)
+    merge_vecs(transpose_vecs(sort_net(ntuple(l->vload(Vec{N, T}, chunk, 1+(l-1)*N), L)...)...)...)
 
 # function sort_small_array(chunk, ::Val{N}, ::Val{L}) where {L,N}
 #     srt = sort_net(ntuple(l->vload(Vec{N, T}, chunk, 1+(l-1)*N), L)...)
 #     @show srt
 #     trn = transpose_vecs(srt...)
 #     @show trn
-#     merge_multiple_vecs(trn...)
+#     merge_vecs(trn...)
 # end
 
 function sort_chunks(data, ::Val{L}, ::Val{N}, ::Val{M}) where {L,N,M}

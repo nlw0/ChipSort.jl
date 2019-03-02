@@ -46,7 +46,7 @@ function test_merge_brave(T, N)
     va = ntuple(k->Vec(ntuple(j->aa[j,k],N)), N)
     srtref = sort(aa[:])
 
-    srthat = merge_multiple_vecs(va...)
+    srthat = merge_vecs(va...)
     srthat_arr = [srthat[n] for n in 1:N*N]
     @test all(srthat_arr .== srtref)
 end

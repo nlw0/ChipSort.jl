@@ -73,32 +73,34 @@ end
 end
 
 
-## These "brave" functions merge 4 and 8 vectors. Relies on SIMD.jls great ability to handle large vectors.
-## Performance not yet tested.
-@inline function merge_multiple_vecs(input::Vararg{Vec{N,T}, 4}) where {N,T}
-    srt1 = bitonic_merge(input[1], input[2])
-    i1 = Vec(tuple(ntuple(n->srt1[1][n], N)..., ntuple(n->srt1[2][n], N)...))
-    srt2 = bitonic_merge(input[3], input[4])
-    i2 = Vec(tuple(ntuple(n->srt2[1][n], N)..., ntuple(n->srt2[2][n], N)...))
-    srt3 = bitonic_merge(i1,i2)
-    Vec(tuple(ntuple(n->srt3[1][n], N * 2)..., ntuple(n->srt3[2][n], N * 2)...))
+@inline function bitonic_merge_concat(input_a::Vec{N,T}, input_b::Vec{N,T}) where {N,T}
+    m_a, m_b = bitonic_merge(input_a, input_b)
+    Vec((NTuple{N,T}(m_a)..., NTuple{N,T}(m_b)...))
 end
 
-@inline function merge_multiple_vecs(input::Vararg{Vec{N,T}, 8}) where {N,T}
-    srt1 = bitonic_merge(input[1], input[2])
-    i1 = Vec(tuple(ntuple(n->srt1[1][n], N)..., ntuple(n->srt1[2][n], N)...))
-    srt2 = bitonic_merge(input[3], input[4])
-    i2 = Vec(tuple(ntuple(n->srt2[1][n], N)..., ntuple(n->srt2[2][n], N)...))
-    srt3 = bitonic_merge(input[5], input[6])
-    i3 = Vec(tuple(ntuple(n->srt3[1][n], N)..., ntuple(n->srt3[2][n], N)...))
-    srt4 = bitonic_merge(input[7], input[8])
-    i4 = Vec(tuple(ntuple(n->srt4[1][n], N)..., ntuple(n->srt4[2][n], N)...))
+## These brave functions merge 4, 8 vectors or even more. Relies on SIMD.jl's great ability to handle large vectors.
+## Performance not yet tested.
+@generated function merge_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}
 
-    srt5 = bitonic_merge(i1, i2)
-    j1 = Vec(tuple(ntuple(n->srt5[1][n], N * 2)..., ntuple(n->srt5[2][n], N * 2)...))
-    srt6 = bitonic_merge(i3, i4)
-    j2 = Vec(tuple(ntuple(n->srt6[1][n], N * 2)..., ntuple(n->srt6[2][n], N * 2)...))
+    ex = [Expr(:meta, :inline)]
 
-    srt7 = bitonic_merge(j1, j2)
-    Vec(tuple(ntuple(n->srt7[1][n], N * 4)..., ntuple(n->srt7[2][n], N * 4)...))
+    for l in 1:L
+        m = Symbol("m_0_", l)
+        push!(ex, :($m = input[$l]))
+    end
+
+    p = mylog(L)
+    for l in 1:p
+        for b in 1:2^(p-l)
+            m = Symbol("m_", l, "_", b)
+            a1 = Symbol("m_", l-1, "_", b*2-1)
+            a2 = Symbol("m_", l-1, "_", b*2)
+            push!(ex, :($m = bitonic_merge_concat($a1, $a2)))
+        end
+    end
+
+    m = Symbol("m_", p, "_", 1)
+    push!(ex, :(return $m))
+
+    quote $(ex...) end
 end
