@@ -15,13 +15,13 @@ Algorithms like Quicksort dominated sorting benchmarks for years, but they tend 
 
 ## Methods
 
-For small arrays, the strategy is to use non-branching and SIMD-friendly [sorting](http://www.cs.brandeis.edu/~hugues/sorting_networks.html) and [bitonic merge](https://en.wikipedia.org/wiki/Bitonic_sorter) networks. This is pretty much the best approach in this case, and even proctical Quicksort implementations use something like this for small arrays. In this situation we try our best to load all the input data into the processor registers, and do as much as we can there before putting any data back into memory. In other words, we sort small sequences _in the chip_.
+For small arrays, our strategy is to use non-branching and SIMD-friendly [sorting](http://www.cs.brandeis.edu/~hugues/sorting_networks.html) and [bitonic merge](https://en.wikipedia.org/wiki/Bitonic_sorter) networks. This is pretty much the best approach in this case, and even practical Quicksort implementations use something like this for small arrays. In this situation we try our best to load all the input data into the processor registers, and do as much as we can there before putting any data back into memory. In other words, we sort small sequences _in the chip_.
 
 For larger arrays, ChipSort employs two stages. The first stage utilizes the same methods for small arrays to create an initial set of ordered sequences. They're made as big as it fits inside register memory before we have to start moving (too much) stuff back to the stack to carry out the calculations. A modern processor core can already offer kilobytes of register memory.
 
-The second stage is to perform a multi-way merge of all these small sequences. They are all processed at the same time, splitted in small buffers which are input to the bitonic merge network. This procedure requires a binary tree to keep intermediate merged sub-sequences, supposed to fit in the cache memory.
+The second stage is to perform a multi-way merge of all these small sequences. They are all processed at the same time, split in small buffers which are input to the bitonic merge network. This procedure requires a binary tree to keep intermediate merged sub-sequences. This structure should fit in the cache memory.
 
-With just two passes trough the whole data in RAM this approach can already handle thousands of entries. If the input array is so large that the merge tree is too big for the cache, then we perform more multi-way merge stages with an increasingly large chunk size.
+With just two passes over the whole data in the RAM this approach can already handle thousands of entries. If the input array is so large that the merge tree is too big for the cache, then we perform more multi-way merge stages with an increasingly large chunk size.
 
 
 ## Implementation
