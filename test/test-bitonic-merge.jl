@@ -39,20 +39,22 @@ end
 end
 
 
-function test_merge_brave(T, N)
+function test_merge_vecs(T, N, L)
     T=Int64
     N=8
-    aa = sort(rand(T, N, N); dims=1)
-    va = ntuple(k->Vec(ntuple(j->aa[j,k],N)), N)
+    aa = sort(rand(T, N, L); dims=1)
+    va = ntuple(k->Vec(ntuple(j->aa[j,k],N)), L)
     srtref = sort(aa[:])
 
     srthat = merge_vecs(va...)
-    srthat_arr = [srthat[n] for n in 1:N*N]
+    srthat_arr = [srthat[n] for n in 1:N*L]
     @test all(srthat_arr .== srtref)
 end
 
 @testset for T in [Int8, Int16, Int32, Int64, Float32, Float64]
-    for N in [4, 8]
-        test_merge_brave(T, N)
+    for N in [4, 16]
+        for L in [4, 16]
+            test_merge_vecs(T, N, L)
+        end
     end
 end
