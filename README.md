@@ -47,4 +47,3 @@ Another notable implementation aspect is the use of non-temporal memory access, 
 - https://github.com/eschnett/SIMD.jl
 - https://github.com/JeffreySarnoff/SortingNetworks.jl
 - https://github.com/JuliaCollections/SortingAlgorithms.jl
-- https://github.com/xiaodaigh/SortingLab.jl
