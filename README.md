@@ -15,7 +15,7 @@ Algorithms like Quicksort dominated sorting benchmarks for years, but they tend 
 
 ## Methods
 
-For small arrays, the strategy is to use non-branching and SIMD-friendly [sorting](http://www.cs.brandeis.edu/~hugues/sorting_networks.html) and [bitonic merge](https://en.wikipedia.org/wiki/Bitonic_sorter) networks. This is pretty much the best approach in this case, and even proctical Quicksort implementations use something like this for small arrays. In this situation we try our best to load all the input data into the processor registers, and do as much as we can there before putting any data back into memory. At this step we are sorting _in the chip_.
+For small arrays, the strategy is to use non-branching and SIMD-friendly [sorting](http://www.cs.brandeis.edu/~hugues/sorting_networks.html) and [bitonic merge](https://en.wikipedia.org/wiki/Bitonic_sorter) networks. This is pretty much the best approach in this case, and even proctical Quicksort implementations use something like this for small arrays. In this situation we try our best to load all the input data into the processor registers, and do as much as we can there before putting any data back into memory. In other words, we sort small sequences _in the chip_.
 
 For larger arrays, ChipSort employs two stages. The first stage utilizes the same methods for small arrays to create an initial set of ordered sequences. They're made as big as it fits inside register memory before we have to start moving (too much) stuff back to the stack to carry out the calculations. A modern processor core can already offer kilobytes of register memory.
 
