@@ -1,5 +1,9 @@
 # ChipSort.jl
 
+<p align="center">
+  <img src="doc/logo/chiplogo.png" width="50%" title="ChipSort logo">
+</p>
+
 ChipSort is a sorting module containing SIMD and cache-aware techniques. It's based on a couple of [research papers](#references) from 2008.
 
 ## Introduction
