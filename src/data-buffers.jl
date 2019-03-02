@@ -7,7 +7,7 @@ abstract type AbstractDataStream end
 mutable struct DataBuffer{N} <: AbstractDataStream
     head
     tail
-    DataBuffer(chunk_size::Val{N}, data) where N = new{N}(Vec(tuple(data[1:N]...)), (@view data[N+1:N*N]))
+    DataBuffer(chunk_size::Val{N}, data) where N = new{N}(Vec(tuple(data[1:N]...)), (@view data[N+1:end]))
 end
 
 mutable struct MergeNode <: AbstractDataStream

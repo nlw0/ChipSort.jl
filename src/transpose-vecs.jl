@@ -2,7 +2,7 @@ using SIMD
 
 
 @generated function transpose_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}
-
+    @assert N==L "This function only supports square matrices"
     ex = Expr[Expr(:meta, :inline)]
 
     pa = Val{ntuple(a->((a-1)*L)%(2*L-1), L)}

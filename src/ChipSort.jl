@@ -1,7 +1,7 @@
 module ChipSort
 import Base.pop!
 
-export sort_net, transpose_vecs, bitonic_merge, merge_multiple_vecs, DataBuffer, MergeNode, pop!
+export sort_net, transpose_vecs, bitonic_merge, merge_multiple_vecs, DataBuffer, MergeNode, pop!, build_multi_merger
 
 include("utils.jl")
 include("sorting-networks.jl")
