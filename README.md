@@ -39,8 +39,8 @@ Another notable implementation aspect is the use of non-temporal memory access, 
 ## References
 
 ### Scientific publications
-- _Efficient Implementation of Sorting on Multi-Core SIMD CPU Architecture_, Jatin Chhugani et al. (2008)
-- _SIMD- and Cache-Friendly Algorithm for Sorting an Array of Structures_, Hiroshi Inoue and Kenjiro Taura (2007)
+- [_Efficient Implementation of Sorting on Multi-Core SIMD CPU Architecture_](http://www.vldb.org/pvldb/1/1454171.pdf), Jatin Chhugani et al. (2008)
+- [_SIMD- and Cache-Friendly Algorithm for Sorting an Array of Structures_](http://www.vldb.org/pvldb/vol8/p1274-inoue.pdf), Hiroshi Inoue and Kenjiro Taura (2007)
 
 ### Related packages
 
