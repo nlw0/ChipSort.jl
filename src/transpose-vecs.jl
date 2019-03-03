@@ -1,12 +1,12 @@
 using SIMD
 
 
-@generated function transpose_vecs(input::Vararg{Vec{N,T}, N}) where {N,T}
-    L = N
+@generated function transpose_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}
+
     ex = Expr[Expr(:meta, :inline)]
 
-    pa = Val{ntuple(a->((a-1)*L)%(2*L-1), L)}
-    pb = Val{ntuple(a->div(L,2)+((a-1)*L)%(2*L-1), L)}
+    pa = Val{ntuple(a->((a-1)*N)%(2*N-1), N)}
+    pb = Val{ntuple(a->div(N,2)+((a-1)*N)%(2*N-1), N)}
 
     for t in 1:L
         a1 = Symbol("input_", 0, "_", t)
@@ -28,31 +28,44 @@ using SIMD
         end
     end
 
-    push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), L)...))
+    ## Reshape matrix if not square
+    if N < L
+
+        outsteps = mylog(div(L,N))
+        for st in 1:outsteps
+            pcat = Val{ntuple(a->a-1, N*2^st)}
+            for t in 1:N*2^(outsteps-st)
+                a1 = Symbol("input_", nsteps+st-1, "_", t*2-1)
+                a2 = Symbol("input_", nsteps+st-1, "_", t*2)
+                b1 = Symbol("input_", nsteps+st, "_", t)
+                push!(ex, :($b1 = shufflevector($a1, $a2, $pcat)))
+            end
+        end
+
+        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps+outsteps, "_", t), N)...))
+
+    elseif N > L
+
+        outsteps = mylog(div(N,L))
+        for st in 1:outsteps
+            pleft = Val{ntuple(a->a-1, div(N,2^st))}
+            pright = Val{ntuple(a->a-1+div(N,2^st), div(N,2^st))}
+            for t in 1:L*2^(st-1)
+                a1 = Symbol("input_", nsteps+st-1, "_", t)
+                b1 = Symbol("input_", nsteps+st, "_", t*2-1)
+                b2 = Symbol("input_", nsteps+st, "_", t*2)
+                append!(ex, [:($b1 = shufflevector($a1, $pleft)),
+                             :($b2 = shufflevector($a1, $pright))])
+            end
+        end
+
+        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps+outsteps, "_", t), N)...))
+
+    else
+
+        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), L)...))
+
+    end
 
     quote $(ex...) end
-end
-
-"""
-Handles "tall" matrices by transposing each vertical half and concatenating horizontally.
-"""
-@inline function transpose_vecs_tall(input::Vararg{Vec{N,T}, L}) ::NTuple{N, Vec{L, T}} where {L,N,T}
-    L2 = div(L,2)
-    top = input[1:L2]
-    bottom = input[1+L2:L]
-    left = transpose_vecs(top...)
-    right = transpose_vecs(bottom...)
-    ntuple(l->concat(left[l], right[l]), L2)
-end
-
-"""
-Handles "wide" matrices by transposing each horizontal half and concatenating vertically.
-"""
-@inline function transpose_vecs_wide(input::Vararg{Vec{N,T}, L}) ::NTuple{N, Vec{L, T}} where {L,N,T}
-    N2 = div(N,2)
-    half_l = Val{ntuple(n->n-1, N2)}
-    half_r = Val{ntuple(n->N2+n-1, N2)}
-    left = ntuple(l->shufflevector(input[l], half_l), L) ::NTuple{L, Vec{N2,T}}
-    right = ntuple(l->shufflevector(input[l], half_r), L) ::NTuple{L, Vec{N2,T}}
-    (transpose_vecs(left...)...,transpose_vecs(right...)...)
 end
