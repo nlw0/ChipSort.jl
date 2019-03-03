@@ -15,10 +15,9 @@ sort_small_array(chunk, ::Val{N}, ::Val{L}) where {L,N} =
 #     merge_vecs(trn...)
 # end
 
-function sort_chunks(data, ::Val{L}, ::Val{N}, ::Val{M}) where {L,N,M}
-    chunks = reshape((@view data[:]), L * N, M)
-    T = eltype(data)
-    output = valloc(T, div(32, sizeof(T)), L*N*M)
+function sort_chunks(output, data, ::Val{L}, ::Val{N}) where {L,N}
+    chunks = reshape((@view data[:]), L * N, :)
+    M = size(chunks,2)
 
     for m in 1:M
         chunk = @view chunks[:, m]
@@ -28,10 +27,10 @@ function sort_chunks(data, ::Val{L}, ::Val{N}, ::Val{M}) where {L,N,M}
     output
 end
 
-function merge_chunks(data, ::Val{L}, ::Val{N}, ::Val{M}) where {L,N,M}
-    chunks = reshape((@view data[:]), L * N, M)
-    T = eltype(data)
-    output = valloc(T, div(32, sizeof(T)), L*N*M)
+function merge_chunks(output, data, ::Val{L}, ::Val{N}) where {L,N}
+    chunks = reshape((@view data[:]), L * N, :)
+    M = size(chunks,2)
+
     merger = build_multi_merger(Val(N), ntuple(m->(@view chunks[:, m]), M)...)
 
     for itr in 1:L*M
@@ -41,25 +40,52 @@ function merge_chunks(data, ::Val{L}, ::Val{N}, ::Val{M}) where {L,N,M}
     output
 end
 
+function chipsort(data, ::Val{N}, ::Val{L}, ::Val{N2}) where {N, L, N2}
+    chunk_size = L * N
+    L2 = div(chunk_size, N2)
+    Nchunks = div(data_size, chunk_size)
+
+    output1 = valloc(T, div(32, sizeof(T)), length(data))
+    output2 = valloc(T, div(32, sizeof(T)), length(data))
+    sort_chunks(output1, data, Val(L), Val(N))
+    merge_chunks(output2, output1, Val(L2), Val(N2))
+    output2
+end
 
 # function sort(data)
 #     sorted_chunks = sort_chunks(data)
 #     merge_chunks(sorted_chunks)
 # end
+# srt = merge_chunks(sc, Val(L2), Val(N2), Val(M));
+# srt'
+
+
+
+# function run_test_stage1(::Val{N}, ::Val{L}) where {N,L}
+#     data_size = 2^10
+#     data = rand(T, data_size)
+#     chunk_size = L * N
+#     M = div(data_size, chunk_size)
+#     output = valloc(T, div(32, sizeof(T)), L*N*M)
+
+#     stat = @benchmark sort_chunks($output, $data, Val($L), Val($N), Val($M))
+#     stat
+# end
 
 
 T = Int32
-L = 8 # buffers per chunk
-N = 8 # buffer size
+data_size = 2^15
 
-N2 = 8
-L2 = div(N*L, N2)
+function run_test(::Val{N}, ::Val{L}) where {N, L}
 
-M = 128 # chunks
+    data = rand(T, data_size)
 
-data = rand(T, L*N*M)
-# data = T[(1:L*N*M)...]
+    stat = @benchmark chipsort($data, Val($N), Val($L), Val($N))
+    stat
+end
 
-sc = sort_chunks(data, Val(L), Val(N), Val(M));
-srt = merge_chunks(sc, Val(L2), Val(N2), Val(M));
-srt'
+N = Val(32)
+@show run_test(N, Val(4))
+@show run_test(N, Val(8))
+@show run_test(N, Val(16))
+@show run_test(N, Val(32))

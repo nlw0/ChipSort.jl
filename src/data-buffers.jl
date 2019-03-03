@@ -49,8 +49,10 @@ end
 
 function pop!(dbuf::DataBuffer{N}) where N
     output = dbuf.head
+    # new_head = dbuf.tail[1:min(N, length(dbuf.tail))]
+    # dbuf.head = if length(new_head)>0 Vec(tuple(new_head...)) else nothing end
     new_head = dbuf.tail[1:min(N, length(dbuf.tail))]
-    dbuf.head = if length(new_head)>0 Vec(tuple(new_head...)) else nothing end
+    dbuf.head = if length(new_head)>0 vload(Vec{N, eltype(dbuf.tail)}, dbuf.tail, 1) else nothing end
     dbuf.tail = @view dbuf.tail[(N+1):end]
     output
 end
