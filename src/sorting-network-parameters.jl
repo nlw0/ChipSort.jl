@@ -3,6 +3,7 @@
 # http://www.cs.brandeis.edu/~hugues/sorting_networks.html
 # https://github.com/JeffreySarnoff/SortingNetworks.jl
 sorting_network_parameters = Dict(
+    2 => (((1,2),),),
     4 => (((1,2), (3,4)), ((1,3), (2,4)), ((2,3),)),
     8 => (
         ((1, 2), (3, 4), (5, 6), (7, 8)), ((1, 3), (2, 4), (5, 7), (6, 8)),

@@ -1,20 +1,20 @@
 using SIMD
-using ChipSort
 
 
 abstract type AbstractDataStream end
 
-mutable struct DataBuffer{N} <: AbstractDataStream
-    head
-    tail
-    DataBuffer(chunk_size::Val{N}, data) where N = new{N}(Vec(tuple(data[1:N]...)), (@view data[N+1:end]))
+mutable struct DataBuffer{N,T}
+    head ::Union{Nothing, Vec{N, T}}
+    tail ::AbstractArray{T}
+    DataBuffer(chunk_size::Val{N}, data::AbstractArray{T}) where {N,T} = new{N,T}(Vec(tuple(data[1:N]...)), (@view data[N+1:end]))
 end
 
-mutable struct MergeNode <: AbstractDataStream
-    head
-    left
-    right
-    MergeNode(left, right) = new(pop!(first_stream(left, right)), left, right)
+mutable struct MergeNode{N,T}
+    head ::Union{Nothing, Vec{N, T}}
+    left ::Union{MergeNode{N,T}, DataBuffer{N,T}}
+    right ::Union{MergeNode{N,T}, DataBuffer{N,T}}
+    MergeNode(left ::Union{MergeNode{N,T}, DataBuffer{N,T}}, right ::Union{MergeNode{N,T}, DataBuffer{N,T}}) where {N,T} =
+        new{N,T}(pop!(first_stream(left, right)), left, right)
 end
 
 function build_multi_merger(chunk_size, data...)
@@ -33,7 +33,7 @@ end
 """
 Returns the stream with the smallest first element. If the two streams are empty, returns `nothing`.
 """
-function first_stream(left::AbstractDataStream, right::AbstractDataStream)
+function first_stream(left ::Union{MergeNode{N,T}, DataBuffer{N,T}}, right ::Union{MergeNode{N,T}, DataBuffer{N,T}}) where {N,T}
     if left.head == nothing && right.head == nothing
         nothing
     elseif left.head == nothing && right.head != nothing
@@ -51,7 +51,7 @@ function pop!(dbuf::DataBuffer{N}) where N
     output = dbuf.head
     # new_head = dbuf.tail[1:min(N, length(dbuf.tail))]
     # dbuf.head = if length(new_head)>0 Vec(tuple(new_head...)) else nothing end
-    new_head = dbuf.tail[1:min(N, length(dbuf.tail))]
+    new_head = @view dbuf.tail[1:min(N, length(dbuf.tail))]
     dbuf.head = if length(new_head)>0 vload(Vec{N, eltype(dbuf.tail)}, dbuf.tail, 1) else nothing end
     dbuf.tail = @view dbuf.tail[(N+1):end]
     output
