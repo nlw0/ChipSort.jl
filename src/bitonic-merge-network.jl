@@ -75,7 +75,7 @@ end
 
 @inline function bitonic_merge_concat(input_a::Vec{N,T}, input_b::Vec{N,T}) where {N,T}
     m_a, m_b = bitonic_merge(input_a, input_b)
-    Vec((NTuple{N,T}(m_a)..., NTuple{N,T}(m_b)...))
+    concat(m_a, m_b)
 end
 
 ## These brave functions merge 4, 8 vectors or even more. Relies on SIMD.jl's great ability to handle large vectors.
