@@ -3,7 +3,7 @@ Benchmark
 
 Some preliminaly experiments comparing the ChipSort performance with the Julia standard sort. Here we are not yet sorting a full array, but just trying to verify that the sorting and merge networks with SIMD pay off significantly in the right conditions, sorting a small chunk of data of an appropriate size. Too little elements and there is too much overhead for the paralelism to be relevant. Too many elements and we start hitting the limits of the processor. Where does our chip perform the best?
 
-This graphic shows the time [eCDF](https://en.wikipedia.org/wiki/Empirical_distribution_function) from times measured in 10,000 trials using BenchmarkTools.jl. The task is to sort 4 consecutive groups of 64 Float32 numbers in a 256 array.
+This graphic shows the time [eCDF](https://en.wikipedia.org/wiki/Empirical_distribution_function) from times measured in 10,000 trials using BenchmarkTools.jl. The task is to sort 4 consecutive groups of 64 Float32 numbers in a 256 array. "Vector" means a SIMD.jl "Vec" array, that is supposed to _e.g._ sit inside a ymm SSE register.
 
 <img src="graphs/chiptime-f32-256-8x8.png">
 
@@ -20,6 +20,3 @@ By increasing the total size of the input array to 16k, although keeping the sma
 The same bar chart with different chunk sizes still shows that performance might degrade, but at the right situation the proposed technique can reach a relative speed of more than 6 times over the baseline.
 
 <img src="graphs/chipspeed-16k-8.png">
-
-chipspeed-16k-8.png
-chiptime-f32-16k-8x8.png
