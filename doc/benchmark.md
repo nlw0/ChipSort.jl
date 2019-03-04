@@ -15,11 +15,11 @@ In this next graphic we show the speed of ChipSort relative to the baseline. The
 
 By increasing the total size of the input array to 16k, although keeping the small size of the chunks we are sorting, the benchmark now results in less variation and also a larger speedup.
 
-<img src="graphs/chiptime-f32-256-8x8.png">
+<img src="graphs/chiptime-f32-16k-8x8.png">
 
 The same bar chart with different chunk sizes still shows that performance might degrade, but at the right situation the proposed technique can reach a relative speed of more than 6 times over the baseline.
 
-<img src="graphs/chiptime-f32-256-8x8.png">
+<img src="graphs/chipspeed-16k-8.png">
 
 chipspeed-16k-8.png
 chiptime-f32-16k-8x8.png
