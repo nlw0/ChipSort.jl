@@ -4,7 +4,7 @@
   <img src="doc/logo/chiplogo.png" width="50%" title="ChipSort logo">
 </p>
 
-ChipSort is a sorting module containing SIMD and cache-aware techniques. It's based on a couple of [research papers](#references) from 2008.
+ChipSort is a sorting module containing SIMD and cache-aware techniques. It's based on a couple of [academic papers](#references) from 2008.
 
 ## Introduction
 
@@ -47,3 +47,4 @@ Another notable implementation aspect is the use of non-temporal memory access, 
 - https://github.com/eschnett/SIMD.jl
 - https://github.com/JeffreySarnoff/SortingNetworks.jl
 - https://github.com/JuliaCollections/SortingAlgorithms.jl
+- https://github.com/xiaodaigh/SortingLab.jl
