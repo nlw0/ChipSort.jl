@@ -1,11 +1,5 @@
-using Profile
-using ProfileView
-using BenchmarkTools
-
 using SIMD
 
-using Revise
-using ChipSort
 
 sort_small_array(chunk::NTuple{L, Vec{N,T}}) where {L,N,T} =
     merge_vecs(transpose_vecs(sort_net(chunk...)...)...)
@@ -78,45 +72,3 @@ end
 #     stat = @benchmark sort_chunks($output, $data, Val($L), Val($N), Val($M))
 #     stat
 # end
-
-
-
-function run_test(::Val{N}, ::Val{L}) where {N, L}
-    TT = Float64
-    data_size=2^14
-    data = rand(TT, data_size)
-
-    chipsort(data, Val(N), Val(L), Val(N))
-end
-
-
-function run_bench(::Val{N}, ::Val{L}) where {N, L}
-    TT = Float64
-    data_size=N*L
-    data = rand(TT, data_size)
-
-    stat = @benchmark chipsort($data, Val($N), Val($L), Val($N))
-    stat
-end
-
-function run_bench_ref() where {N, L}
-    TT = Float64
-    data_size=2^14
-    data = rand(TT, data_size)
-
-    stat = @benchmark sort($data)
-    stat
-end
-
-N = Val(4)
-
-# run_test(N, Val(8))
-# Profile.clear()  # in case we have any previous profiling data
-# @profile run_test(N, Val(8))
-# ProfileView.view()
-
-@show run_bench(N, Val(4))
-@show run_bench(N, Val(8))
-@show run_bench(N, Val(16))
-@show run_bench(N, Val(32))
-@show run_bench_ref()
