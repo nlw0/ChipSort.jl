@@ -1,0 +1,25 @@
+Benchmark
+=========
+
+Some preliminaly experiments comparing the ChipSort performance with the Julia standard sort. Here we are not yet sorting a full array, but just trying to verify that the sorting and merge networks with SIMD pay off significantly in the right conditions, sorting a small chunk of data of an appropriate size. Too little elements and there is too much overhead for the paralelism to be relevant. Too many elements and we start hitting the limits of the processor. Where does our chip perform the best?
+
+This graphic shows the time [eCDF](https://en.wikipedia.org/wiki/Empirical_distribution_function) from times measured in 10,000 trials using BenchmarkTools.jl. The task is to sort 4 consecutive groups of 64 Float32 numbers in a 256 array.
+
+<img src="graphs/chiptime-f32-256-8x8.png">
+
+Because this is such a small task there is a lot of variation in the measured times. The curve for ChipSort is quite more to the left, though, indicating we do get a speedup in this situation. It is not always the case, though.
+
+In this next graphic we show the speed of ChipSort relative to the baseline. The task is different in each case, we are sorting the 256 values in groups of 8 times `n`, where `n` is the value in each column. As we can see, once we increase past 8x8 we lose the benefits from the techniques used in ChipSort.
+
+<img src="graphs/chipspeed-256-8.png">
+
+By increasing the total size of the input array to 16k, although keeping the small size of the chunks we are sorting, the benchmark now results in less variation and also a larger speedup.
+
+<img src="graphs/chiptime-f32-256-8x8.png">
+
+The same bar chart with different chunk sizes still shows that performance might degrade, but at the right situation the proposed technique can reach a relative speed of more than 6 times over the baseline.
+
+<img src="graphs/chiptime-f32-256-8x8.png">
+
+chipspeed-16k-8.png
+chiptime-f32-16k-8x8.png

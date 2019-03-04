@@ -92,7 +92,7 @@ end
 
 function run_bench(::Val{N}, ::Val{L}) where {N, L}
     TT = Float64
-    data_size=2^14
+    data_size=N*L
     data = rand(TT, data_size)
 
     stat = @benchmark chipsort($data, Val($N), Val($L), Val($N))
