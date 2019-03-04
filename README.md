@@ -65,7 +65,7 @@ The second stage is to perform a multi-way merge of all these small sequences. T
 
 With just two passes over the whole data in the RAM this approach can already handle thousands of entries. If the input array is so large that the merge tree is too big for the cache, then we perform more multi-way merge stages with an increasingly large chunk size.
 
-To find out more about the performance gains ChipSort can provide, check our [benchmark](blob/master/doc/benchmark.md) documentation page. Note that this project is still young, and a lot of work is necessary to offer a reliable sort guaranteed to be as good as e.g. the one offered by the Julia standard library. Our first priority is to be a laboratory for implementing generic SIMD-based sorting techniques in Julia.
+To find out more about the performance gains ChipSort can provide, check our [benchmark](doc/benchmark.md) documentation page. Note that this project is still young, and a lot of work is necessary to offer a reliable sort guaranteed to be as good as e.g. the one offered by the Julia standard library. Our first priority is to be a laboratory for implementing generic SIMD-based sorting techniques in Julia.
 
 ## Implementation
 
