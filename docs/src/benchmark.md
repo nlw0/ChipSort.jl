@@ -17,7 +17,7 @@ In this next graphic we show the speed of ChipSort relative to the baseline. The
 <img src="../assets/chipspeed-256-8.png">
 ```
 
-oi
+
 
 By increasing the total size of the input array to 16k, although keeping the small size of the chunks we are sorting, the benchmark now results in less variation and also a larger speedup.
 
