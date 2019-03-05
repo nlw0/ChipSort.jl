@@ -28,7 +28,7 @@ With just two passes over the whole data in the RAM this approach can already ha
 
 ## Implementation details
 
-One interesting aspect from the ChipSort implementation is the extensive use of meta-programming, one . Our implementation of the sorting network, bitonic merge network and matrix transpose are all based on generated functions.
+One interesting aspect from the ChipSort implementation is the extensive use of meta-programming, one of the greatest and most unique Julia features. Our implementation of the sorting network, bitonic merge network and matrix transpose are all based on generated functions.
 
 This module relies on SIMD.jl whenever necessary. In special, the transpose and bitonic merge use the `shufflevector` function. The sorting network uses the `min` and `max` functions, which the `Vec` class supports.
 
