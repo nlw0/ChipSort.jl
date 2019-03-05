@@ -1,11 +1,11 @@
 language: julia
 
 os:
-  - osx
+#  - osx
   - linux
 
 julia:
-  - 1.0
+#  - 1.0
   - nightly
 
 # # Uncomment the following lines to allow failures on nightly julia
