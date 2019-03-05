@@ -8,9 +8,9 @@ makedocs(
         "api.md",
         "benchmark.md"
     ],
-    format = Documenter.HTML(
-        prettyurls = get(ENV, "CI", nothing) == "true"
-    )
+    # format = Documenter.HTML(
+    #     prettyurls = get(ENV, "CI", nothing) == "true"
+    # )
 )
 
 deploydocs(
