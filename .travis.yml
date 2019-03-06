@@ -20,7 +20,7 @@ notifications:
 codecov: true
 
 after_success:
- - julia -e 'if VERSION >= v"0.7.0-" using Pkg end; cd(Pkg.dir("ChipSort")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
+ - julia -e 'cd(Pkg.dir("ChipSort")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())';
 
 jobs:
   include:
