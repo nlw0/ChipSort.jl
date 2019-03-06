@@ -4,7 +4,7 @@
 
 # ChipSort.jl Documentation
 
-ChipSort is a Julia module that implements SIMD and cache-aware sorting techniques.
+[ChipSort](https://github.com/nlw0/ChipSort.jl) is a Julia module that implements SIMD and cache-aware sorting techniques.
 
 This documentation contains:
 - A description of the [API](api.md) and how to use the Julia functions defined in the module.
@@ -17,7 +17,7 @@ This documentation contains:
 Like any experimental Julia package on GitHub you can install ChipSort by first  typing `]` to enter the package management shell, and then
 
 ```
-(v1.2) pkg> add https://github.com/nlw0/ChipSort.jl
+pkg> add https://github.com/nlw0/ChipSort.jl
 ```
 
 You can now try out the basic functions offered by the package such as `sort_net()` to use a sorting network, or use the complete array sorting function prototype `chipsort()`.
