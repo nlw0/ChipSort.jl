@@ -18,7 +18,7 @@ Like any experimental Julia package on GitHub you can install ChipSort from the 
 pkg> add https://github.com/nlw0/ChipSort.jl
 ```
 
-You can now try out the basic functions offered by the package such as `sort_net` to use a sorting network, or the initial sorting prototype implementation `chipsort`.
+You can now try out the basic functions offered by the package such as `sort_net` to use a sorting network, or try the full array sort function prototype `chipsort`.
 
 ```
 julia> using ChipSort
