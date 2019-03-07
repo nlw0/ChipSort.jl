@@ -4,14 +4,6 @@ using SIMD
 sort_small_array(chunk::NTuple{L, Vec{N,T}}) where {L,N,T} =
     merge_vecs(transpose_vecs(sort_net(chunk...)...)...)
 
-# function sort_small_array(chunk, ::Val{N}, ::Val{L}) where {L,N}
-#     srt = sort_net(ntuple(l->vload(Vec{N, T}, chunk, 1+(l-1)*N), L)...)
-#     @show srt
-#     trn = transpose_vecs(srt...)
-#     @show trn
-#     merge_vecs(trn...)
-# end
-
 function sort_chunks(output, data::Array{T, 1}, ::Val{L}, ::Val{N}) where {L,N,T}
     chunk_size = N*L
     num_chunks = div(length(data), chunk_size)
@@ -52,23 +44,3 @@ function chipsort(data::Array{T, 1}, ::Val{N}, ::Val{L}, ::Val{N2}) where {T, N,
     merge_chunks(output2, output1, Val(L2), Val(N2))
     output2
 end
-
-# function sort(data)
-#     sorted_chunks = sort_chunks(data)
-#     merge_chunks(sorted_chunks)
-# end
-# srt = merge_chunks(sc, Val(L2), Val(N2), Val(M));
-# srt'
-
-
-
-# function run_test_stage1(::Val{N}, ::Val{L}) where {N,L}
-#     data_size = 2^10
-#     data = rand(T, data_size)
-#     chunk_size = L * N
-#     M = div(data_size, chunk_size)
-#     output = valloc(T, div(32, sizeof(T)), L*N*M)
-
-#     stat = @benchmark sort_chunks($output, $data, Val($L), Val($N), Val($M))
-#     stat
-# end
