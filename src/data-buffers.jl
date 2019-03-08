@@ -21,8 +21,6 @@ function build_multi_merger(chunk_size, data...)
     k = length(data)
     if k == 1
         DataBuffer(chunk_size, data[1])
-    elseif k == 2
-        MergeNode(DataBuffer(chunk_size, data[1]), DataBuffer(chunk_size, data[2]))
     else
         MergeNode(build_multi_merger(chunk_size, data[1:div(k,2)]...),
                   build_multi_merger(chunk_size, data[1+div(k,2):end]...))
@@ -49,8 +47,6 @@ end
 
 function pop!(dbuf::DataBuffer{N}) where N
     output = dbuf.head
-    # new_head = dbuf.tail[1:min(N, length(dbuf.tail))]
-    # dbuf.head = if length(new_head)>0 Vec(tuple(new_head...)) else nothing end
     new_head = @view dbuf.tail[1:min(N, length(dbuf.tail))]
     dbuf.head = if length(new_head)>0 vload(Vec{N, eltype(dbuf.tail)}, dbuf.tail, 1) else nothing end
     dbuf.tail = @view dbuf.tail[(N+1):end]

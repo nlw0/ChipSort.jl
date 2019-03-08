@@ -20,8 +20,8 @@ function sort_chunks(output, data::Array{T, 1}, ::Val{L}, ::Val{N}) where {L,N,T
 end
 
 function merge_chunks(output, data, ::Val{L}, ::Val{N}) where {L,N}
-    chunks = reshape((@view data[:]), L * N, :)
-    M = size(chunks,2)
+    chunks = reshape((@view data[:]), L*N, :)
+    M = div(length(data), L*N)
 
     merger = build_multi_merger(Val(N), ntuple(m->(@view chunks[:, m]), M)...)
 

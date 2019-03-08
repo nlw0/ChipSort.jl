@@ -47,6 +47,5 @@ The elements must support the `min` and `max` functions. In the case of `SIMD.Ve
     push!(ex,
           Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), L)...))
 
-    ex
     quote $(ex...) end
 end
