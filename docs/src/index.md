@@ -14,13 +14,13 @@ This documentation contains:
 
 ## Installation and basic usage
 
-Like any experimental Julia package on GitHub you can install ChipSort by first  typing `]` to enter the package management shell, and then
+Like any experimental Julia package on GitHub you can install ChipSort from the Julia REPL by first typing `]` to enter the package management prompt, and then
 
 ```
 pkg> add https://github.com/nlw0/ChipSort.jl
 ```
 
-You can now try out the basic functions offered by the package such as `sort_net()` to use a sorting network, or use the complete array sorting function prototype `chipsort()`.
+You can now try out the basic functions offered by the package such as `sort_net` to use a sorting network, or try the full array sort function prototype `chipsort`.
 
 ```
 julia> using ChipSort

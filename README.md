@@ -12,7 +12,7 @@ ChipSort is a sorting module containing SIMD and cache-aware techniques. It's ba
 
 ## Installation and usage
 
-Like any experimental Julia package on GitHub you can install ChipSort from the Julia REPL by first typing `]` to enter the package management shell, and then
+Like any experimental Julia package on GitHub you can install ChipSort from the Julia REPL by first typing `]` to enter the package management prompt, and then
 
 ```
 pkg> add https://github.com/nlw0/ChipSort.jl
