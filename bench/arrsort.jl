@@ -5,7 +5,7 @@ using ChipSort
 function chipsort_2_chunks(output1, output2, data::Array{T, 1}, ::Val{N}, ::Val{L}, ::Val{NB}) where {T, N, L, NB}
     chunk_size = L * N
 
-    Nchunks = div(size(data, 1), chunk_size)
+    Nchunks = div(length(data), chunk_size)
     @assert Nchunks == 2
 
     # output1 = valloc(T, div(32, sizeof(T)), length(data))
@@ -56,33 +56,43 @@ end
 # @show srt_ref == srt_hat
 # srt_hat'
 
-data = rand(UInt64, 8*8*2)
-srt_ref = sort(data)
 
-baseline = @benchmark srt_hat = sort(data)
 
-T=eltype(data)
-output1 = valloc(T, div(32, sizeof(T)), length(data))
-output2 = valloc(T, div(32, sizeof(T)), length(data))
+# data = rand(UInt64, 8*8*2)
+# srt_ref = sort(data)
+# baseline = @benchmark srt_hat = sort(data)
+# T=eltype(data)
+# output1 = valloc(T, div(32, sizeof(T)), length(data))
+# output2 = valloc(T, div(32, sizeof(T)), length(data))
+# propo = @benchmark srt_hat = chipsort_2_chunks(output1, output2, data, Val(8), Val(8), Val(8))
+# @show baseline
+# @show propo
 
-propo = @benchmark srt_hat = chipsort_2_chunks(output1, output2, data, Val(8), Val(8), Val(8))
-@show baseline
-@show propo
 
-#using ProfileView
+function mytest()
+    T = UInt32
+    data = rand(T, 8*8*2)
+    output1 = valloc(T, div(32, sizeof(T)), length(data))
+    output2 = valloc(T, div(32, sizeof(T)), length(data))
+    @code_native chipsort_2_chunks(output1, output2, data, Val(8), Val(8), Val(8))
+    output2
+end
+
+# f() = [mytest() for _ in 1:1000]
+# f()
+# using ProfileView
 # using Profile
 # Profile.clear()
-# mytest() = chipsort_2_chunks(rand(UInt64, 8*8*2), Val(8), Val(8))
-# @profile [mytest() for _ in 1:1000]
+# @profile f()
 # ProfileView.view()
 
-# @code_native chipsort_2_chunks(output1, output2, data, Val(8), Val(8), Val(8))
+mytest()
 
 
-times = []
-for n in 1:20
-    data = rand(UInt64, 2^n)
-    qq = @benchmark sort($data)
-    push!(times, qq)
-end
-using P
+# times = []
+# for n in 1:20
+#     data = rand(UInt64, 2^n)
+#     qq = @benchmark sort($data)
+#     push!(times, qq)
+# end
+# using P
