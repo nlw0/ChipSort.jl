@@ -10,7 +10,7 @@ Applies a sorting network of size L to the input elements, returning a sorted tu
 
 The elements must support the `min` and `max` functions. In the case of `SIMD.Vec` objects each "lane" across the vectors will be sorted. Therefore with L vectors of size N this function will produce N sorted sequences of size L, after the data is transposed (see transpose_vecs).
 """
-@generated function sort_net(input::Vararg{T, L}) where {L,T}
+function sort_net(input::Vararg{T, L}) where {L,T}
 
     ex = Expr[Expr(:meta, :inline)]
 
@@ -49,3 +49,5 @@ The elements must support the `min` and `max` functions. In the case of `SIMD.Ve
 
     quote $(ex...) end
 end
+
+sort_net(rand(4)...)
