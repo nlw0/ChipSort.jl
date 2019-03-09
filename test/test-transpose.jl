@@ -4,6 +4,8 @@ using ChipSort
 using SIMD
 
 
+@testset "Transpose" begin
+
 # types_to_test = [UInt8, UInt16, UInt32, UInt64, Float32, Float64]
 types_to_test = [UInt16, Float64]
 
@@ -20,4 +22,6 @@ end
             test_transpose_vecs(T, N, L)
         end
     end
+end
+
 end

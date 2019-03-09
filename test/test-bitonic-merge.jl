@@ -4,6 +4,8 @@ using ChipSort
 using SIMD
 
 
+@testset "Bitonic Merge" begin
+
 function test_merge_types_sizes(T, N)
     va = Vec(tuple(sort(rand(T, N))...))
     vb = Vec(tuple(sort(rand(T, N))...))
@@ -14,12 +16,13 @@ function test_merge_types_sizes(T, N)
     @test all(ab[2:end] .>= ab[1:end-1])
 end
 
-@testset for T in [Int8, Int16, Int32, Int64, Float32, Float64]
-    for N in 2 .^ (1:3)
-        test_merge_types_sizes(T, N)
+@testset "Basic bitonic merge" begin
+    for T in [Int8, Int16, Int32, Int64, Float32, Float64]
+        for N in 2 .^ (1:3)
+            test_merge_types_sizes(T, N)
+        end
     end
 end
-
 
 function test_merge_heaviside(N, Na, Nb)
     va = Vec(ntuple(n->if n<=Na 0x0 else 0x1 end, N))
@@ -30,10 +33,12 @@ function test_merge_heaviside(N, Na, Nb)
     @test all(ab[Na+Nb+1:end] .== 1)
 end
 
-@testset for N in 2 .^ (1:8)
-    for Na in 0:N
-        for Nb in 0:N
-            test_merge_heaviside(N, Na, Nb)
+@testset "Exaustive binary arrays" begin
+    for N in 2 .^ (1:8)
+        for Na in 0:N
+            for Nb in 0:N
+                test_merge_heaviside(N, Na, Nb)
+            end
         end
     end
 end
@@ -51,10 +56,14 @@ function test_merge_vecs(T, N, L)
     @test all(srthat_arr .== srtref)
 end
 
-@testset for T in [Int8, Int16, Int32, Int64, Float32, Float64]
-    for N in [4, 16]
-        for L in [4, 16]
-            test_merge_vecs(T, N, L)
+@testset "Multiple vectors" begin
+    for T in [Int8, Int16, Int32, Int64, Float32, Float64]
+        for N in [4, 16]
+            for L in [4, 16]
+                test_merge_vecs(T, N, L)
+            end
         end
     end
+end
+
 end

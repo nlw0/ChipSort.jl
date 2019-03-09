@@ -3,6 +3,8 @@ using Test
 using SIMD
 using ChipSort
 
+@testset "Sorting networks" begin
+
 function test_sorting_networks(T, N)
     vv = rand(T, N)
     srtref = sort(vv)
@@ -58,4 +60,6 @@ end
     for Na in 0:(2^N-1)
             test_sort_heaviside(N, Na)
     end
+end
+
 end

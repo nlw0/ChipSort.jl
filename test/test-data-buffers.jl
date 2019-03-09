@@ -2,6 +2,8 @@ using Test
 using SIMD
 using ChipSort
 
+@testset "Data buffers" begin
+
 # types_to_test = [Int8, Int16, Int32, Int64, Float32, Float64]
 types_to_test = [Int8, Float64]
 
@@ -58,4 +60,6 @@ end
             test_multi_way_merge(T, Val(N), Val(M))
         end
     end
+end
+
 end
