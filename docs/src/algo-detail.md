@@ -4,7 +4,7 @@ Most of ChipSort.jl was implemented as generated functions, a very interesting a
 
 ## Sorting networks
 
-Sorting networks are built from a fundamental operation, the comparator, that takes two values in and outputs them in order. By organizing these operations correctly we can build a network that takes a sequence of multiple values in and outputs them in order. For the sake of efficiency, when designing such a network we usually try to use as few operations as possible and also allow them to occur in parallel.
+Sorting networks are built from a fundamental operation, the comparator, that takes two values in and outputs them in order. By organizing these comparators correctly we can build a network that takes in a sequence of multiple values and outputs the sorted sequence. For the sake of efficiency, when designing such a network we try to use as few operations as possible and also allow them to occur in parallel.
 
 ```@raw html
 <center><img src="../assets/sorting-network-4.svg" width="70%"/></center>
