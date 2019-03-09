@@ -51,7 +51,7 @@ quote
     input_1_1 = min(input_0_1, input_0_2)
     input_1_2 = max(input_0_1, input_0_2)
     input_1_3 = min(input_0_3, input_0_4)
-    input_1_4 = max(input_0_3, input_0_4)	
+    input_1_4 = max(input_0_3, input_0_4)
     input_2_1 = min(input_1_1, input_1_3)
     input_2_3 = max(input_1_1, input_1_3)
     input_2_2 = min(input_1_2, input_1_4)
@@ -66,4 +66,34 @@ end
 As we can see, each step creates a block of assignments calculating `min` and `max` from pairs of values from the past step. The values are selected according to the network definition.
 
 
-## Bitonic networks
+## Bitonic merge networks
+
+Let's look now at the code generated for a bitonic merge network. We have again a pipeline where the number of steps is the logarithm of the number of values. At each step we take two vectors, get the pairwise `min` and `max` from them, and perform a shuffling, reordering the values across the two vectors.
+```julia
+julia> bitonic_merge(Vec((1, 3, 5, 7)), Vec((2, 4, 6, 8)))
+(<4 x Int64>[1, 2, 3, 4], <4 x Int64>[5, 6, 7, 8])
+
+# ...Load modified library
+
+julia> bitonic_merge(Vec((1, 3, 5, 7)), Vec((2, 4, 6, 8)))
+quote
+    #= /home/user/src/ChipSort.jl/src/bitonic-merge-network.jl:76 =#
+    $(Expr(:meta, :inline))
+    la_0 = input_a
+    lb_0 = shufflevector(input_b, Val{(3, 2, 1, 0)})
+    L_0 = min(la_0, lb_0)
+    H_0 = max(la_0, lb_0)
+    la_1 = shufflevector(L_0, H_0, Val{(0, 1, 4, 5)})
+    lb_1 = shufflevector(L_0, H_0, Val{(2, 3, 6, 7)})
+    L_1 = min(la_1, lb_1)
+    H_1 = max(la_1, lb_1)
+    la_2 = shufflevector(L_1, H_1, Val{(0, 4, 2, 6)})
+    lb_2 = shufflevector(L_1, H_1, Val{(1, 5, 3, 7)})
+    L_2 = min(la_2, lb_2)
+    H_2 = max(la_2, lb_2)
+    la_3 = shufflevector(L_2, H_2, Val{(0, 4, 1, 5)})
+    lb_3 = shufflevector(L_2, H_2, Val{(2, 6, 3, 7)})
+    (la_3, lb_3)
+end
+```
+The really tricky part is figuring out the shuffling parameters at each step. Although it is not as challenging as finding optimal sorting networks.
