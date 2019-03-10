@@ -77,10 +77,11 @@ Merges two `SIMD.Vec` objects of the same type and size using a bitonic sort net
 end
 
 
-@inline function bitonic_merge_concat(input_a::Vec{N,T}, input_b::Vec{N,T}) where {N,T}
+@inline function bitonic_merge_concat(input_a::Vec{N,T}, input_b::Vec{N,T})::Vec{2*N,T} where {N,T}
     m_a, m_b = bitonic_merge(input_a, input_b)
     concat(m_a, m_b)
 end
+
 
 ## These brave functions merge 4, 8 vectors or even more. Relies on the great ability from SIMD.jl and LLVM to handle
 ## large vectors. Performance not yet tested.
