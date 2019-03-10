@@ -15,5 +15,6 @@ include("transpose-vecs.jl")
 include("bitonic-merge-network.jl")
 include("data-buffers.jl")
 include("sort-array.jl")
+include("sort-array-medium.jl")
 
 end # module

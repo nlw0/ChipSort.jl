@@ -82,8 +82,8 @@ end
     concat(m_a, m_b)
 end
 
-## These brave functions merge 4, 8 vectors or even more. Relies on SIMD.jl's great ability to handle large vectors.
-## Performance not yet tested.
+## These brave functions merge 4, 8 vectors or even more. Relies on the great ability from SIMD.jl and LLVM to handle
+## large vectors. Performance not yet tested.
 @generated function merge_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}
 
     ex = [Expr(:meta, :inline)]
