@@ -9,6 +9,7 @@
 This documentation contains:
 - A description of the [API](api.md) and how to use the Julia functions defined in the module.
 - A presentation of the [theory](theory.md) behind ChipSort.
+- Some further [details](algo-detail.md) from the algorithm implementations.
 - A report with some [benchmark](benchmark.md) results.
 
 
