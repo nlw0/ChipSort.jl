@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "ChipSort.jl Documentation",
     "title": "ChipSort.jl Documentation",
     "category": "section",
-    "text": "ChipSort is a Julia module that implements SIMD and cache-aware sorting techniques.This documentation contains:A description of the API and how to use the Julia functions defined in the module.\nA presentation of the theory behind ChipSort.\nA report with some benchmark results."
+    "text": "ChipSort is a Julia module that implements SIMD and cache-aware sorting techniques.This documentation contains:A description of the API and how to use the Julia functions defined in the module.\nA presentation of the theory behind ChipSort.\nSome further details from the algorithm implementations.\nA report with some benchmark results."
 },
 
 {
