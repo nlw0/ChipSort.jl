@@ -6,7 +6,7 @@ export
     transpose_vecs, transpose_vecs_tall, transpose_vecs_wide,
     bitonic_merge, merge_vecs, build_multi_merger,
     DataBuffer, MergeNode, pop!,
-    chipsort, sort_chunks
+    chipsort, sort_chunks, chipsort_medium
 
 
 include("utils.jl")
