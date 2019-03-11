@@ -24,6 +24,7 @@ end
     end
 end
 
+
 function test_merge_heaviside(N, Na, Nb)
     va = Vec(ntuple(n->if n<=Na 0x0 else 0x1 end, N))
     vb = Vec(ntuple(n->if n<=Nb 0x0 else 0x1 end, N))
@@ -61,6 +62,26 @@ end
         for N in [4, 16]
             for L in [4, 16]
                 test_merge_vecs(T, N, L)
+            end
+        end
+    end
+end
+
+
+function test_merge_interleaved(T, N, L)
+    va = [Vec(tuple(sort(rand(T, N))...)) for l in 1:L]
+    vb = [Vec(tuple(sort(rand(T, N))...)) for l in 1:L]
+    vv = [a for aa in zip(va, vb) for a in aa]
+    mm = [bitonic_merge_interleaved(vv...)...]
+    ref = [x for xx in [bitonic_merge(aa...) for aa in zip(va, vb)] for x in xx]
+    @test all(all(x) for x in (mm .== ref))
+end
+
+@testset "Basic bitonic merge interleaved" begin
+    for T in [Int8, Int32, Float64]
+        for N in 2 .^ (2:3)
+            for L in [2,8]
+                test_merge_interleaved(T,N,L)
             end
         end
     end

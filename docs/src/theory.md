@@ -26,6 +26,8 @@ The second stage is to perform a multi-way merge of all these small sequences. T
 
 With just two passes over the whole data in the RAM this approach can already handle thousands of entries. If the input array is so large that the merge tree is too big for the cache, then we perform more multi-way merge stages with an increasingly large chunk size.
 
+The main alternative technique, not explered here at first, is based on radix sort (≈quicksort). The memory access issues can be dealt with by software managed buffers that concentrate data in the lower caches. Another technique such as sorting networks or combosort must still be employed for small arrays.
+
 ## Implementation details
 
 One interesting aspect from the ChipSort implementation is the extensive use of meta-programming, one of the greatest and most unique Julia features. Our implementation of the sorting network, bitonic merge network and matrix transpose are all based on generated functions.

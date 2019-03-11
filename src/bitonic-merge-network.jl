@@ -109,3 +109,79 @@ end
 
     quote $(ex...) end
 end
+
+"""
+    bitonic_merge_interleaved(input::Vec{N,T}...)
+
+Merges multiple pairs of `SIMD.Vec` objects of the same type and size using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Returns a tuple with pairs of vectors with the first and second halves of the merged sequences.
+"""
+@generated function bitonic_merge_interleaved(input::Vararg{Vec{N,T}, L}) where {L,N,T}
+
+    allex = []
+    out_tuple = []
+    for indy in 1:div(L,2)
+        iSymbol(x...) = Symbol("indy_", indy, "_", x...)
+        pat = Val{ntuple(x->N-x, N)}
+
+        n = 0
+        la = iSymbol("la_", n)
+        lb = iSymbol("lb_", n)
+        L = iSymbol("L_", n)
+        H = iSymbol("H_", n)
+        ex = [
+
+            :($la = input[$(indy*2-1)]),
+            :($lb = shufflevector(input[$(indy*2)], $pat)),
+            :($L = min($la, $lb)),
+            :($H = max($la, $lb))
+        ]
+
+        p = mylog(N)
+        for n in 1:p
+            la = iSymbol("la_", n)
+            lb = iSymbol("lb_", n)
+            Lp = iSymbol("L_", n-1)
+            Hp = iSymbol("H_", n-1)
+            L = iSymbol("L_", n)
+            H = iSymbol("H_", n)
+
+            ih = inverse_shuffle(bitonic_step(2^(n), 2^(p-n+1)))
+            sh = bitonic_step(2^(n+1), 2^(p-n))
+            pat_a = Val{tuple((ih[sh[1:N]].-1)...)}
+            pat_b = Val{tuple((ih[sh[(N+1):end]].-1)...)}
+
+            append!(ex, [
+                :($la = shufflevector($Lp, $Hp, $pat_a)),
+                :($lb = shufflevector($Lp, $Hp, $pat_b)),
+                :($L = min($la, $lb)),
+                :($H = max($la, $lb))
+            ])
+        end
+
+        la = iSymbol("la_", p+1)
+        lb = iSymbol("lb_", p+1)
+        Lp = iSymbol("L_", p)
+        Hp = iSymbol("H_", p)
+
+        ih = inverse_shuffle(bitonic_step(2N, 1))
+        pat_a = Val{tuple((ih[1:N].-1)...)}
+        pat_b = Val{tuple((ih[(N+1):end].-1)...)}
+
+        append!(ex, [
+            :($la = shufflevector($Lp, $Hp, $pat_a)),
+            :($lb = shufflevector($Lp, $Hp, $pat_b)),
+        ])
+        push!(allex, ex)
+        append!(out_tuple, [la, lb])
+    end
+
+    inteleaved = [x for xx in zip(allex...) for x in xx]
+
+    final_ex = [
+        Expr(:meta, :inline),
+        inteleaved...,
+        Expr(:tuple, out_tuple...)
+    ]
+
+    quote $(final_ex...) end
+end
