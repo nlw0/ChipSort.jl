@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Theory",
     "title": "Scientific publications",
     "category": "section",
-    "text": "Efficient Implementation of Sorting on Multi-Core SIMD CPU Architecture, Jatin Chhugani et al. (2008)\nSIMD- and Cache-Friendly Algorithm for Sorting an Array of Structures, Hiroshi Inoue and Kenjiro Taura (2007)"
+    "text": "Efficient Implementation of Sorting on Multi-Core SIMD CPU Architecture, Jatin Chhugani et al. (2008)\nSIMD- and Cache-Friendly Algorithm for Sorting an Array of Structures, Hiroshi Inoue and Kenjiro Taura (2007)\nMulti-Core, Main-Memory Joins: Sort vs. Hash Revisited, Cagri Balkesen et al. (2014)"
 },
 
 {
