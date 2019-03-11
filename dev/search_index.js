@@ -53,7 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Theory",
     "title": "Methods",
     "category": "section",
-    "text": "To sort small arrays we employ non-branching and SIMD-friendly sorting and bitonic merge networks. This is pretty much the best approach in this case, especially if only few different input sizes must be supported. In this situation we try our best to load all the input data into the processor registers, and do as much as we can there before putting any data back into memory. In other words, we sort small sequences in the chip.For larger arrays, ChipSort employs two stages. The first stage utilizes the same methods for small arrays to create an initial set of ordered sequences. They\'re made as big as it fits inside register memory before we have to start moving (too much) stuff back to the stack to carry out the calculations. A modern processor core can already offer kilobytes of register memory.The second stage is to perform a multi-way merge of all these small sequences. They are all processed at the same time, split in small buffers which are input to the bitonic merge network. This procedure requires a binary tree that stores intermediate merged sub-sequences. This structure should fit in the cache memory.With just two passes over the whole data in the RAM this approach can already handle thousands of entries. If the input array is so large that the merge tree is too big for the cache, then we perform more multi-way merge stages with an increasingly large chunk size."
+    "text": "To sort small arrays we employ non-branching and SIMD-friendly sorting and bitonic merge networks. This is pretty much the best approach in this case, especially if only few different input sizes must be supported. In this situation we try our best to load all the input data into the processor registers, and do as much as we can there before putting any data back into memory. In other words, we sort small sequences in the chip.For larger arrays, ChipSort employs two stages. The first stage utilizes the same methods for small arrays to create an initial set of ordered sequences. They\'re made as big as it fits inside register memory before we have to start moving (too much) stuff back to the stack to carry out the calculations. A modern processor core can already offer kilobytes of register memory.The second stage is to perform a multi-way merge of all these small sequences. They are all processed at the same time, split in small buffers which are input to the bitonic merge network. This procedure requires a binary tree that stores intermediate merged sub-sequences. This structure should fit in the cache memory.With just two passes over the whole data in the RAM this approach can already handle thousands of entries. If the input array is so large that the merge tree is too big for the cache, then we perform more multi-way merge stages with an increasingly large chunk size.The main alternative technique, not explered here at first, is based on radix sort (≈quicksort). The memory access issues can be dealt with by software managed buffers that concentrate data in the lower caches. Another technique such as sorting networks or combosort must still be employed for small arrays."
 },
 
 {
@@ -150,6 +150,14 @@ var documenterSearchIndex = {"docs": [
     "title": "ChipSort.bitonic_merge",
     "category": "method",
     "text": "bitonic_merge(input_a::Vec{N,T}, input_b::Vec{N,T}) where {N,T}\n\nMerges two SIMD.Vec objects of the same type and size using a bitonic sort network. The inputs are assumed to be sorted. Returns a pair of vectors with the first and second halves of the merged sequence.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#ChipSort.bitonic_merge_interleaved-Union{Tuple{Vararg{Vec{N,T},L}}, Tuple{T}, Tuple{N}, Tuple{L}} where T where N where L",
+    "page": "API",
+    "title": "ChipSort.bitonic_merge_interleaved",
+    "category": "method",
+    "text": "bitonic_merge_interleaved(input::Vec{N,T}...)\n\nMerges multiple pairs of SIMD.Vec objects of the same type and size using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Returns a tuple with pairs of vectors with the first and second halves of the merged sequences.\n\n\n\n\n\n"
 },
 
 {
