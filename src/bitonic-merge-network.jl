@@ -170,15 +170,20 @@ end
 end
 
 """
-    bitonic_merge_interleaved(input::Vec{N,T}...)
+    bitonic_merge_interleaved(output_a, output_b, input_a, input_b, Val(N))
 
-Merges multiple pairs of `SIMD.Vec` objects of the same type and size using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Returns a tuple with pairs of vectors with the first and second halves of the merged sequences.
+Merges K pairs of vectors using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Inputs and outputs are acessed directly in memory.
 """
-@generated function bitonic_merge_interleaved(input::Vararg{Vec{N,T}, L}) where {L,N,T}
+@generated function bitonic_merge_interleaved(
+    output_a::NTuple{K, Ptr{T}},
+    output_b::NTuple{K, Ptr{T}},
+    input_a::NTuple{K, Ptr{T}},
+    input_b::NTuple{K, Ptr{T}},
+    ::Val{N}
+) where {K,N,T}
 
     allex = []
-    out_tuple = []
-    for indy in 1:div(L,2)
+    for indy in 1:K
         iSymbol(x...) = Symbol("indy_", indy, "_", x...)
         pat = Val{ntuple(x->N-x, N)}
 
@@ -188,9 +193,8 @@ Merges multiple pairs of `SIMD.Vec` objects of the same type and size using a bi
         L = iSymbol("L_", n)
         H = iSymbol("H_", n)
         ex = [
-
-            :($la = input[$(indy*2-1)]),
-            :($lb = shufflevector(input[$(indy*2)], $pat)),
+            :($la = vloada(Vec{N,T}, input_a[$indy])),
+            :($lb = shufflevector(vloada(Vec{N,T}, input_b[$indy]), $pat)),
             :($L = min($la, $lb)),
             :($H = max($la, $lb))
         ]
@@ -227,19 +231,17 @@ Merges multiple pairs of `SIMD.Vec` objects of the same type and size using a bi
         pat_b = Val{tuple((ih[(N+1):end].-1)...)}
 
         append!(ex, [
-            :($la = shufflevector($Lp, $Hp, $pat_a)),
-            :($lb = shufflevector($Lp, $Hp, $pat_b)),
+            :(vstorea(shufflevector($Lp, $Hp, $pat_a), output_a[$indy])),
+            :(vstorea(shufflevector($Lp, $Hp, $pat_b), output_b[$indy])),
         ])
         push!(allex, ex)
-        append!(out_tuple, [la, lb])
     end
 
     inteleaved = [x for xx in zip(allex...) for x in xx]
 
     final_ex = [
         Expr(:meta, :inline),
-        inteleaved...,
-        Expr(:tuple, out_tuple...)
+        inteleaved...
     ]
 
     quote $(final_ex...) end
