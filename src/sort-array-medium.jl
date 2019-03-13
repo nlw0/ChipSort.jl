@@ -129,29 +129,93 @@ function chipsort_medium(input::AbstractArray{T,1}, ::Val{C}, ::Val{N}, ::Val{L}
         vstorea(srt, output, 1+(cc-1)*N*L)
     end
 
-    input, output = output, valloc(T, div(32,sizeof(T)), N*L*C)
+    # pairs = C
+    # l = L
 
-    pairs = C
-    l = L
+    do_merge_pass(output, valloc(T, div(32,sizeof(T)), N*L*C), Val(C>>1), Val(N), Val(L<<1))
 
     # display(reshape(input, 16, :))
 
-    @inbounds while pairs > 1
-        K = N*l
-        pairs = pairs >> 1
+    # @inbounds while pairs > 1
+    #     K = N*l
+    #     pairs = pairs >> 1
 
-        chunks_a = [(@view input[ c*2*K+1   :    c*2*K+K]) for c in 0:pairs-1]
-        chunks_b = [(@view input[ c*2*K+1+K    :   c*2*K+2*K]) for c in 0:pairs-1]
+    #     chunks_a = [(@view input[ c*2*K+1   :    c*2*K+K]) for c in 0:pairs-1]
+    #     chunks_b = [(@view input[ c*2*K+1+K    :   c*2*K+2*K]) for c in 0:pairs-1]
+
+    #     bitonic_merge_interleaved(
+    #         ntuple(c->pointer(output, 1+(c-1)*2*K), pairs),
+    #         ntuple(c->pointer(output, 1+N+(c-1)*2*K), pairs),
+    #         ntuple(c->pointer(chunks_a[c], 1), pairs),
+    #         ntuple(c->pointer(chunks_b[c], 1), pairs),
+    #         Val(N)
+    #     )
+
+    #     for c in 1:pairs
+    #         chunks_a[c] = @view chunks_a[c][1+N:end]
+    #         chunks_b[c] = @view chunks_b[c][1+N:end]
+    #     end
+
+    #     # display(reshape(output, 16, :))
+    #     # display(chunks_a)
+    #     # display(chunks_b)
+
+    #     for iter in 1:(2*l-2)
+    #         next_inputs = Array{Ptr{T}}(undef, pairs)
+    #         # @show l, N, pairs
+    #         for c in 1:pairs
+    #             if length(chunks_a[c]) > 0 && (length(chunks_b[c]) == 0 || chunks_a[c][1] < chunks_b[c][1])
+    #                 next_inputs[c] = pointer(chunks_a[c], 1)
+    #                 chunks_a[c] = @view chunks_a[c][1+N:end]
+    #             else
+    #                 next_inputs[c] = pointer(chunks_b[c], 1)
+    #                 chunks_b[c] = @view chunks_b[c][1+N:end]
+    #             end
+    #         end
+
+    #         bitonic_merge_interleaved(
+    #             ntuple(c->pointer(output, 1+iter*N+(c-1)*2*K), pairs),
+    #             ntuple(c->pointer(output, 1+(iter+1)*N+(c-1)*2*K), pairs),
+    #             ntuple(c->pointer(output, 1+iter*N+(c-1)*2*K), pairs),
+    #             ntuple(c->next_inputs[c], pairs),
+    #             Val(N)
+    #         )
+
+    #         # display(reshape(output, 16,:))
+    #     # display(chunks_a)
+    #     # display(chunks_b)
+
+    #         # merge_pair2(output, input, pout, p1, p2, end1, end2, l,n,T)
+    #     end
+    #     l = l<<1
+    #     input, output = output, input
+    # end
+    # input
+end
+
+
+function do_merge_pass(input::AbstractArray{T,1}, output::AbstractArray{T,1}, ::Val{C}, ::Val{N}, ::Val{L}) where {T,C,N,L}
+    # @show ("oi", C, N, L)
+
+    @inbounds if C == 0
+        input
+    else
+        K = N*L
+
+        # @show size(input)
+
+        chunks_a = [(@view input[ c*K + 1 : c*K + K>>1]) for c in 0:C-1]
+        chunks_b = [(@view input[ c*K + 1+K>>1 : c*K + K]) for c in 0:C-1]
 
         bitonic_merge_interleaved(
-            ntuple(c->pointer(output, 1+(c-1)*2*K), pairs),
-            ntuple(c->pointer(output, 1+N+(c-1)*2*K), pairs),
-            ntuple(c->pointer(chunks_a[c], 1), pairs),
-            ntuple(c->pointer(chunks_b[c], 1), pairs),
+            ntuple(c->pointer(output, 1+(c-1)*K), C),
+            ntuple(c->pointer(output, 1+N+(c-1)*K), C),
+            ntuple(c->pointer(chunks_a[c], 1), C),
+            ntuple(c->pointer(chunks_b[c], 1), C),
             Val(N)
         )
 
-        for c in 1:pairs
+        for c in 1:C
             chunks_a[c] = @view chunks_a[c][1+N:end]
             chunks_b[c] = @view chunks_b[c][1+N:end]
         end
@@ -160,10 +224,10 @@ function chipsort_medium(input::AbstractArray{T,1}, ::Val{C}, ::Val{N}, ::Val{L}
         # display(chunks_a)
         # display(chunks_b)
 
-        for iter in 1:(2*l-2)
-            next_inputs = Array{Ptr{T}}(undef, pairs)
-            # @show l, N, pairs
-            for c in 1:pairs
+        for iter in 1:(L-2)
+            next_inputs = Array{Ptr{T}}(undef, C)
+            # @show l, N, C
+            for c in 1:C
                 if length(chunks_a[c]) > 0 && (length(chunks_b[c]) == 0 || chunks_a[c][1] < chunks_b[c][1])
                     next_inputs[c] = pointer(chunks_a[c], 1)
                     chunks_a[c] = @view chunks_a[c][1+N:end]
@@ -174,10 +238,10 @@ function chipsort_medium(input::AbstractArray{T,1}, ::Val{C}, ::Val{N}, ::Val{L}
             end
 
             bitonic_merge_interleaved(
-                ntuple(c->pointer(output, 1+iter*N+(c-1)*2*K), pairs),
-                ntuple(c->pointer(output, 1+(iter+1)*N+(c-1)*2*K), pairs),
-                ntuple(c->pointer(output, 1+iter*N+(c-1)*2*K), pairs),
-                ntuple(c->next_inputs[c], pairs),
+                ntuple(c->pointer(output, 1+iter*N+(c-1)*K), C),
+                ntuple(c->pointer(output, 1+(iter+1)*N+(c-1)*K), C),
+                ntuple(c->pointer(output, 1+iter*N+(c-1)*K), C),
+                ntuple(c->next_inputs[c], C),
                 Val(N)
             )
 
@@ -187,8 +251,8 @@ function chipsort_medium(input::AbstractArray{T,1}, ::Val{C}, ::Val{N}, ::Val{L}
 
             # merge_pair2(output, input, pout, p1, p2, end1, end2, l,n,T)
         end
-        l = l<<1
-        input, output = output, input
+
+        do_merge_pass(output, input, Val(C>>1), Val(N), Val(L<<1))
     end
-    input
+
 end
