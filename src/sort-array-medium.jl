@@ -88,28 +88,22 @@ end
 
 function merge_pair2(output, input, pout, p1, p2, end1, end2, L,N,T)
     h1 = vloada(Vec{N, T}, input, p1)
-    h2 = vloada(Vec{N, T}, input, p2)
 
-    out, state = bitonic_merge(h1, h2)
-    vstorea(out, output, pout)
+    state = bitonic_merge2(h1, pointer(input, p2), pointer(output, pout))
+
     pout += N
 
     p1 += N
     p2 += N
-    h1 = vloada(Vec{N, T}, input, p1)
-    h2 = vloada(Vec{N, T}, input, p2)
 
     for ii in 1:2*L-2
-        if p2>=end2 || p1 < end1 && h1[1] < h2[1]
-            out, state = bitonic_merge(state, h1)
+        if p2>=end2 || p1 < end1 && input[p1] < input[p2]
+            state = bitonic_merge2(state, pointer(input, p1), pointer(output, pout))
             p1 += N
-            h1 = vloada(Vec{N, T}, input, p1)
         else
-            out, state = bitonic_merge(state, h2)
+            state = bitonic_merge2(state, pointer(input, p2), pointer(output, pout))
             p2 += N
-            h2 = vloada(Vec{N, T}, input, p2)
         end
-        vstorea(out, output, pout)
         pout+=N
     end
     vstorea(state, output, pout)
