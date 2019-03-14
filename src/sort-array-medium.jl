@@ -49,210 +49,87 @@ function chipsort_medium_old(input::AbstractArray{T,A}, ::Val{C}, ::Val{N}, ::Va
     output
 end
 
-# function chipsort_medium(input::AbstractArray{T,1}, ::Val{C}, ::Val{N}, ::Val{L}) where {T,C,N,L}
-#     output = valloc(T, div(32,sizeof(T)), N*L*C)
 
-#     K = N*L
+function chipsort_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
+    output = valloc(T, div(32,sizeof(T)), V*J*K)
 
-#     for cc in 1:C
-#         chunks = ntuple(l->vloada(Vec{N, T}, input, 1+(cc-1)*N*L + (l-1)*N), L)::NTuple{L,Vec{N,T}}
-#         if L>1
-#             srt = sort_small_array(chunks)
-#         else
-#             srt=chunks[1]
-#         end
-#         vstorea(srt, output, 1+(cc-1)*N*L)
-#     end
-
-#     input, output = output, valloc(T, div(32,sizeof(T)), N*L*C)
-
-#     pairs = C
-#     l = 1#L
-#     n = N*L#N
-#     while pairs > 1
-#         K = n*l
-#         pairs = pairs >> 1
-#         for cc in 0:pairs-1
-#             p1 = cc*2*K+1
-#             p2 = cc*2*K+1+K
-#             end1 = cc*2*K+1+K
-#             end2 = cc*2*K+1+2*K
-#             pout = cc*2*K+1
-#             merge_pair2(output, input, pout, p1, p2, end1, end2, l,n,T)
-#         end
-#         l = l<<1
-#         input, output = output, input
-#     end
-#     input
-# end
-
-# function merge_pair2(output, input, pout, p1, p2, end1, end2, L,N,T)
-#     h1 = vloada(Vec{N, T}, input, p1)
-
-#     state = bitonic_merge2(h1, pointer(input, p2), pointer(output, pout))
-
-#     pout += N
-
-#     p1 += N
-#     p2 += N
-
-#     for ii in 1:2*L-2
-#         if p2>=end2 || p1 < end1 && input[p1] < input[p2]
-#             state = bitonic_merge2(state, pointer(input, p1), pointer(output, pout))
-#             p1 += N
-#         else
-#             state = bitonic_merge2(state, pointer(input, p2), pointer(output, pout))
-#             p2 += N
-#         end
-#         pout+=N
-#     end
-#     vstorea(state, output, pout)
-#     nothing
-# end
-
-
-
-
-
-function chipsort_medium(input::AbstractArray{T,1}, ::Val{C}, ::Val{N}, ::Val{L}) where {T,C,N,L}
-    output = valloc(T, div(32,sizeof(T)), N*L*C)
-
-    K = N*L
-
-    for cc in 1:C
-        chunks = ntuple(l->vloada(Vec{N, T}, input, 1+(cc-1)*N*L + (l-1)*N), L)::NTuple{L,Vec{N,T}}
-        if L>1
-            srt = sort_small_array(chunks)
-        else
-            srt=chunks[1]
+    if J>1
+        for cc in 1:K
+            chunks = ntuple(l->vloada(Vec{V, T}, input, 1+(cc-1)*V*J + (l-1)*V), J) ::NTuple{J, Vec{V,T}}
+            srt = sort_small_array(chunks) ::Vec{V*J,T}
+            vstorea(srt, output, 1+(cc-1)*V*J)
         end
-        vstorea(srt, output, 1+(cc-1)*N*L)
+    else
+        for cc in 1:K
+            chunk = ntuple(v->input[v+(cc-1)*V], V)
+            srt = Vec(sort_net(chunk...)) ::Vec{V*J,T}
+            vstorea(srt, output, 1+(cc-1)*V*J)
+        end
     end
 
-    # pairs = C
-    # l = L
+    new_input = reshape(output, V, J, K)
 
-    do_merge_pass(output, valloc(T, div(32,sizeof(T)), N*L*C), Val(C>>1), Val(N), Val(L<<1))
+    chunks_a = [(@view new_input[:,1:end,c*2-1]) for c in 1:K>>1]
+    chunks_b = [(@view new_input[:,1:end,c*2]) for c in 1:K>>1]
 
-    # display(reshape(input, 16, :))
-
-    # @inbounds while pairs > 1
-    #     K = N*l
-    #     pairs = pairs >> 1
-
-    #     chunks_a = [(@view input[ c*2*K+1   :    c*2*K+K]) for c in 0:pairs-1]
-    #     chunks_b = [(@view input[ c*2*K+1+K    :   c*2*K+2*K]) for c in 0:pairs-1]
-
-    #     bitonic_merge_interleaved(
-    #         ntuple(c->pointer(output, 1+(c-1)*2*K), pairs),
-    #         ntuple(c->pointer(output, 1+N+(c-1)*2*K), pairs),
-    #         ntuple(c->pointer(chunks_a[c], 1), pairs),
-    #         ntuple(c->pointer(chunks_b[c], 1), pairs),
-    #         Val(N)
-    #     )
-
-    #     for c in 1:pairs
-    #         chunks_a[c] = @view chunks_a[c][1+N:end]
-    #         chunks_b[c] = @view chunks_b[c][1+N:end]
-    #     end
-
-    #     # display(reshape(output, 16, :))
-    #     # display(chunks_a)
-    #     # display(chunks_b)
-
-    #     for iter in 1:(2*l-2)
-    #         next_inputs = Array{Ptr{T}}(undef, pairs)
-    #         # @show l, N, pairs
-    #         for c in 1:pairs
-    #             if length(chunks_a[c]) > 0 && (length(chunks_b[c]) == 0 || chunks_a[c][1] < chunks_b[c][1])
-    #                 next_inputs[c] = pointer(chunks_a[c], 1)
-    #                 chunks_a[c] = @view chunks_a[c][1+N:end]
-    #             else
-    #                 next_inputs[c] = pointer(chunks_b[c], 1)
-    #                 chunks_b[c] = @view chunks_b[c][1+N:end]
-    #             end
-    #         end
-
-    #         bitonic_merge_interleaved(
-    #             ntuple(c->pointer(output, 1+iter*N+(c-1)*2*K), pairs),
-    #             ntuple(c->pointer(output, 1+(iter+1)*N+(c-1)*2*K), pairs),
-    #             ntuple(c->pointer(output, 1+iter*N+(c-1)*2*K), pairs),
-    #             ntuple(c->next_inputs[c], pairs),
-    #             Val(N)
-    #         )
-
-    #         # display(reshape(output, 16,:))
-    #     # display(chunks_a)
-    #     # display(chunks_b)
-
-    #         # merge_pair2(output, input, pout, p1, p2, end1, end2, l,n,T)
-    #     end
-    #     l = l<<1
-    #     input, output = output, input
-    # end
-    # input
+    do_merge_pass(
+        new_input,
+        reshape(valloc(T, div(32,sizeof(T)), V*J*K), V, J<<1, K>>1),
+        chunks_a, chunks_b,
+        Val(V), Val(J<<1), Val(K>>1)
+    )
 end
 
+@inline function do_merge_pass(input::AbstractArray{T,3}, output::AbstractArray{T,3}, chunks_a, chunks_b,::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
 
-function do_merge_pass(input::AbstractArray{T,1}, output::AbstractArray{T,1}, ::Val{C}, ::Val{N}, ::Val{L}) where {T,C,N,L}
-    # @show ("oi", C, N, L)
+    for c in 1:K
+        output[:,1,c] .= chunks_a[c][:,1]
+    end
+    next_inputs = [pointer(c) for c in chunks_b]
 
-    @inbounds if C == 0
-        input
-    else
-        K = N*L
+    bitonic_merge_interleaved(
+        output,
+        next_inputs,
+        Val(V), 1, Val(K)
+    )
 
-        # @show size(input)
-
-        chunks_a = [(@view input[ c*K + 1 : c*K + K>>1]) for c in 0:C-1]
-        chunks_b = [(@view input[ c*K + 1+K>>1 : c*K + K]) for c in 0:C-1]
-
-        bitonic_merge_interleaved(
-            ntuple(c->pointer(output, 1+(c-1)*K), C),
-            ntuple(c->pointer(output, 1+N+(c-1)*K), C),
-            ntuple(c->pointer(chunks_a[c], 1), C),
-            ntuple(c->pointer(chunks_b[c], 1), C),
-            Val(N)
-        )
-
-        for c in 1:C
-            chunks_a[c] = @view chunks_a[c][1+N:end]
-            chunks_b[c] = @view chunks_b[c][1+N:end]
-        end
-
-        # display(reshape(output, 16, :))
-        # display(chunks_a)
-        # display(chunks_b)
-
-        for iter in 1:(L-2)
-            next_inputs = Array{Ptr{T}}(undef, C)
-            # @show l, N, C
-            for c in 1:C
-                if length(chunks_a[c]) > 0 && (length(chunks_b[c]) == 0 || chunks_a[c][1] < chunks_b[c][1])
-                    next_inputs[c] = pointer(chunks_a[c], 1)
-                    chunks_a[c] = @view chunks_a[c][1+N:end]
-                else
-                    next_inputs[c] = pointer(chunks_b[c], 1)
-                    chunks_b[c] = @view chunks_b[c][1+N:end]
-                end
-            end
-
-            bitonic_merge_interleaved(
-                ntuple(c->pointer(output, 1+iter*N+(c-1)*K), C),
-                ntuple(c->pointer(output, 1+(iter+1)*N+(c-1)*K), C),
-                ntuple(c->pointer(output, 1+iter*N+(c-1)*K), C),
-                ntuple(c->next_inputs[c], C),
-                Val(N)
-            )
-
-            # display(reshape(output, 16,:))
-        # display(chunks_a)
-        # display(chunks_b)
-
-            # merge_pair2(output, input, pout, p1, p2, end1, end2, l,n,T)
-        end
-
-        do_merge_pass(output, input, Val(C>>1), Val(N), Val(L<<1))
+    for c in 1:K
+        chunks_a[c] = (@view (chunks_a[c][:,2:end]))
+        chunks_b[c] = (@view (chunks_b[c][:,2:end]))
     end
 
+    for iter in 2:(J-1)
+        for c in 1:K
+            if length(chunks_a[c]) > 0 && (length(chunks_b[c]) == 0 || chunks_a[c][1,1] < chunks_b[c][1,1])
+                next_inputs[c] = pointer(chunks_a[c], 1)
+                chunks_a[c] = (@view (chunks_a[c][:,2:end]))
+            else
+                next_inputs[c] = pointer(chunks_b[c], 1)
+                chunks_b[c] = (@view (chunks_b[c][:,2:end]))
+            end
+        end
+
+        bitonic_merge_interleaved(
+            output,
+            next_inputs,
+            Val(V), iter, Val(K)
+        )
+    end
+
+    if K == 1
+        reshape(output, :)
+    else
+
+        for c in 1:K>>1
+            chunks_a[c] = @view output[:,1:end,c*2-1]
+            chunks_b[c] = @view output[:,1:end,c*2]
+        end
+
+        do_merge_pass(
+            output,
+            reshape(input, V,J<<1,K>>1),
+            chunks_a, chunks_b,
+            Val(V), Val(J<<1), Val(K>>1)
+        )
+    end
 end

@@ -175,17 +175,17 @@ end
 Merges K pairs of vectors using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Inputs and outputs are acessed directly in memory.
 """
 @generated function bitonic_merge_interleaved(
-    output_a::NTuple{K, Ptr{T}},
-    output_b::NTuple{K, Ptr{T}},
-    input_a::NTuple{K, Ptr{T}},
-    input_b::NTuple{K, Ptr{T}},
-    ::Val{N}
-) where {K,N,T}
+    output::AbstractArray{T,3},
+    input::Array{Ptr{T},1},
+    ::Val{V},
+    J,
+    ::Val{K},
+) where {T,V,K}
 
     allex = []
     for indy in 1:K
         iSymbol(x...) = Symbol("indy_", indy, "_", x...)
-        pat = Val{ntuple(x->N-x, N)}
+        pat = Val{ntuple(x->V-x, V)}
 
         n = 0
         la = iSymbol("la_", n)
@@ -193,13 +193,13 @@ Merges K pairs of vectors using a bitonic sort network, with interleaved executi
         L = iSymbol("L_", n)
         H = iSymbol("H_", n)
         ex = [
-            :($la = vloada(Vec{N,T}, input_a[$indy])),
-            :($lb = shufflevector(vloada(Vec{N,T}, input_b[$indy]), $pat)),
+            :($la = vloada(Vec{V,T}, pointer(@view output[:,J,$indy]))),
+            :($lb = shufflevector(vloada(Vec{V,T}, input[$indy]), $pat)),
             :($L = min($la, $lb)),
             :($H = max($la, $lb))
         ]
 
-        p = mylog(N)
+        p = mylog(V)
         for n in 1:p
             la = iSymbol("la_", n)
             lb = iSymbol("lb_", n)
@@ -210,8 +210,8 @@ Merges K pairs of vectors using a bitonic sort network, with interleaved executi
 
             ih = inverse_shuffle(bitonic_step(2^(n), 2^(p-n+1)))
             sh = bitonic_step(2^(n+1), 2^(p-n))
-            pat_a = Val{tuple((ih[sh[1:N]].-1)...)}
-            pat_b = Val{tuple((ih[sh[(N+1):end]].-1)...)}
+            pat_a = Val{tuple((ih[sh[1:V]].-1)...)}
+            pat_b = Val{tuple((ih[sh[(V+1):end]].-1)...)}
 
             append!(ex, [
                 :($la = shufflevector($Lp, $Hp, $pat_a)),
@@ -226,13 +226,13 @@ Merges K pairs of vectors using a bitonic sort network, with interleaved executi
         Lp = iSymbol("L_", p)
         Hp = iSymbol("H_", p)
 
-        ih = inverse_shuffle(bitonic_step(2N, 1))
-        pat_a = Val{tuple((ih[1:N].-1)...)}
-        pat_b = Val{tuple((ih[(N+1):end].-1)...)}
+        ih = inverse_shuffle(bitonic_step(2V, 1))
+        pat_a = Val{tuple((ih[1:V].-1)...)}
+        pat_b = Val{tuple((ih[(V+1):end].-1)...)}
 
         append!(ex, [
-            :(vstorea(shufflevector($Lp, $Hp, $pat_a), output_a[$indy])),
-            :(vstorea(shufflevector($Lp, $Hp, $pat_b), output_b[$indy])),
+            :(vstorea(shufflevector($Lp, $Hp, $pat_a), pointer(@view output[:,J,$indy]))),
+            :(vstorea(shufflevector($Lp, $Hp, $pat_b), pointer(@view output[:,J+1,$indy])))
         ])
         push!(allex, ex)
     end
