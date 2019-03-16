@@ -50,7 +50,7 @@ function chipsort_medium_old(input::AbstractArray{T,A}, ::Val{C}, ::Val{N}, ::Va
 end
 
 
-function chipsort_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
+function chipsort_merge_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
     output = valloc(T, div(32,sizeof(T)), V*J*K)
 
     if J>1
