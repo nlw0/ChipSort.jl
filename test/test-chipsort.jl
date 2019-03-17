@@ -8,8 +8,9 @@ using SIMD
 data = rand(256)
 @test chipsort(data,Val(8),Val(8),Val(8)) == sort(data)
 
-data = rand(256)
-@test chipsort_medium(data,Val(4),Val(8),Val(8)) == sort(data)
+data = rand(2^13)
+ref = sort(data)
+@test chipsort_medium!(data,Val(4),Val(8)) == ref
 
 data = tuple((Vec(tuple(sort(rand(Int8,4))...)) for _ in 1:4)...)
 stream_to_array(data) = [k[i] for i in 1:length(data), k in data][:]
