@@ -23,9 +23,6 @@ function sort_vecs!(data::AbstractVector{T}, ::Val{L}, ::Val{N}, ::Val{Transpose
     num_chunks = div(length(data), chunk_size)
 
     for m in 1:num_chunks
-        # chunk = @view chunks[:, m]
-        # ntuple(l->vload(Vec{N, T}, chunk, 1+(l-1)*N), L)
-
         chunk = ntuple(l->vload(Vec{N, T}, data, 1 + (m-1)*chunk_size + (l-1)*N), L)
         sorted_vecs = if Transpose
             transpose_vecs(sort_net(chunk...)...)
@@ -33,8 +30,14 @@ function sort_vecs!(data::AbstractVector{T}, ::Val{L}, ::Val{N}, ::Val{Transpose
             sort_net(chunk...)
         end
 
-        for l in 1:L
-            vstorent(sorted_vecs[l], data, 1 + (m-1)*(N*L) + (l-1)*N)
+        if Transpose
+            for n in 1:N
+                vstorent(sorted_vecs[n], data, 1 + (m-1)*(N*L) + (n-1)*L)
+            end
+        else
+            for n in 1:L
+                vstorent(sorted_vecs[n], data, 1 + (m-1)*(N*L) + (n-1)*N)
+            end
         end
     end
     nothing
