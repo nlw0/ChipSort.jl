@@ -97,6 +97,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "theory/#Other-languages-1",
+    "page": "Theory",
+    "title": "Other languages",
+    "category": "section",
+    "text": "ultra-sort"
+},
+
+{
     "location": "algo-detail/#",
     "page": "Algorithms in detail",
     "title": "Algorithms in detail",
