@@ -2,6 +2,8 @@ using Test
 using ChipSort
 using SIMD
 
+include("testutils.jl")
+
 @testset "Array sorting" begin
 
 data = randa(Int32, 256)
@@ -10,6 +12,10 @@ data = randa(Int32, 256)
 data = randa(Int32, 2^13)
 ref = sort(data)
 @test chipsort_medium!(data,Val(8),Val(8),Val(128)) == ref
+
+data = randa(Int32, 2^13)
+ref = sort(data)
+@test chipsort_merge_medium(data,Val(8),Val(8),Val(128)) == ref
 
 data = tuple((Vec(tuple(sort(randa(Int8,4))...)) for _ in 1:4)...)
 stream_to_array(data) = [k[i] for i in 1:length(data), k in data][:]
