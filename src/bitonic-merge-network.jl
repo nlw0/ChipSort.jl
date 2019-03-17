@@ -4,21 +4,6 @@
 using SIMD
 
 
-function inverse_shuffle(tt)
-    out = copy(tt)
-    for n in 1:length(tt)
-        out[tt[n]] = n
-    end
-    out
-end
-
-
-function bitonic_step(G, Glen)
-    N = G * Glen
-    gg = reshape(1:N, Glen, G)
-    t_lh = [gg[:,1:2:end][:]; gg[:,2:2:end][:]]
-end
-
 """
     bitonic_merge(input_a::Vec{N,T}, input_b::Vec{N,T}) where {N,T}
 
@@ -76,15 +61,26 @@ Merges two `SIMD.Vec` objects of the same type and size using a bitonic sort net
     quote $(ex...) end
 end
 
+function inverse_shuffle(tt)
+    out = copy(tt)
+    for n in 1:length(tt)
+        out[tt[n]] = n
+    end
+    out
+end
 
-@inline function bitonic_merge_concat(input_a::Vec{N,T}, input_b::Vec{N,T})::Vec{2*N,T} where {N,T}
-    m_a, m_b = bitonic_merge(input_a, input_b)
-    concat(m_a, m_b)
+function bitonic_step(G, Glen)
+    N = G * Glen
+    gg = reshape(1:N, Glen, G)
+    t_lh = [gg[:,1:2:end][:]; gg[:,2:2:end][:]]
 end
 
 
-## These brave functions merge 4, 8 vectors or even more. Relies on the great ability from SIMD.jl and LLVM to handle
-## large vectors. Performance not yet tested.
+"""
+    merge_vecs(input...)
+
+This brave function merges 4, 8 vectors or even more. Relies on the great ability from SIMD.jl and LLVM to handle
+large vectors. Performance not yet tested."""
 @generated function merge_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}
 
     ex = [Expr(:meta, :inline)]
@@ -110,18 +106,29 @@ end
     quote $(ex...) end
 end
 
-"""
-    bitonic_merge_interleaved(input::Vec{N,T}...)
+@inline function bitonic_merge_concat(input_a::Vec{N,T}, input_b::Vec{N,T})::Vec{2*N,T} where {N,T}
+    m_a, m_b = bitonic_merge(input_a, input_b)
+    concat(m_a, m_b)
+end
 
-Merges multiple pairs of `SIMD.Vec` objects of the same type and size using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Returns a tuple with pairs of vectors with the first and second halves of the merged sequences.
+
 """
-@generated function bitonic_merge_interleaved(input::Vararg{Vec{N,T}, L}) where {L,N,T}
+    bitonic_merge_interleaved(output_a, output_b, input_a, input_b, Val(N))
+
+Merges K pairs of vectors using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Inputs and outputs are acessed directly in memory.
+"""
+@generated function bitonic_merge_interleaved(
+    output::AbstractArray{T,3},
+    input::Array{Ptr{T},1},
+    ::Val{V},
+    J,
+    ::Val{K}
+) where {T,V,K}
 
     allex = []
-    out_tuple = []
-    for indy in 1:div(L,2)
+    for indy in 1:K
         iSymbol(x...) = Symbol("indy_", indy, "_", x...)
-        pat = Val{ntuple(x->N-x, N)}
+        pat = Val{ntuple(x->V-x, V)}
 
         n = 0
         la = iSymbol("la_", n)
@@ -129,14 +136,13 @@ Merges multiple pairs of `SIMD.Vec` objects of the same type and size using a bi
         L = iSymbol("L_", n)
         H = iSymbol("H_", n)
         ex = [
-
-            :($la = input[$(indy*2-1)]),
-            :($lb = shufflevector(input[$(indy*2)], $pat)),
+            :($la = vloada(Vec{V,T}, pointer(@view output[:,J,$indy]))),
+            :($lb = shufflevector(vloada(Vec{V,T}, input[$indy]), $pat)),
             :($L = min($la, $lb)),
             :($H = max($la, $lb))
         ]
 
-        p = mylog(N)
+        p = mylog(V)
         for n in 1:p
             la = iSymbol("la_", n)
             lb = iSymbol("lb_", n)
@@ -147,8 +153,8 @@ Merges multiple pairs of `SIMD.Vec` objects of the same type and size using a bi
 
             ih = inverse_shuffle(bitonic_step(2^(n), 2^(p-n+1)))
             sh = bitonic_step(2^(n+1), 2^(p-n))
-            pat_a = Val{tuple((ih[sh[1:N]].-1)...)}
-            pat_b = Val{tuple((ih[sh[(N+1):end]].-1)...)}
+            pat_a = Val{tuple((ih[sh[1:V]].-1)...)}
+            pat_b = Val{tuple((ih[sh[(V+1):end]].-1)...)}
 
             append!(ex, [
                 :($la = shufflevector($Lp, $Hp, $pat_a)),
@@ -163,24 +169,22 @@ Merges multiple pairs of `SIMD.Vec` objects of the same type and size using a bi
         Lp = iSymbol("L_", p)
         Hp = iSymbol("H_", p)
 
-        ih = inverse_shuffle(bitonic_step(2N, 1))
-        pat_a = Val{tuple((ih[1:N].-1)...)}
-        pat_b = Val{tuple((ih[(N+1):end].-1)...)}
+        ih = inverse_shuffle(bitonic_step(2V, 1))
+        pat_a = Val{tuple((ih[1:V].-1)...)}
+        pat_b = Val{tuple((ih[(V+1):end].-1)...)}
 
         append!(ex, [
-            :($la = shufflevector($Lp, $Hp, $pat_a)),
-            :($lb = shufflevector($Lp, $Hp, $pat_b)),
+            :(vstorea(shufflevector($Lp, $Hp, $pat_a), pointer(@view output[:,J,$indy]))),
+            :(vstorea(shufflevector($Lp, $Hp, $pat_b), pointer(@view output[:,J+1,$indy])))
         ])
         push!(allex, ex)
-        append!(out_tuple, [la, lb])
     end
 
     inteleaved = [x for xx in zip(allex...) for x in xx]
 
     final_ex = [
         Expr(:meta, :inline),
-        inteleaved...,
-        Expr(:tuple, out_tuple...)
+        inteleaved...
     ]
 
     quote $(final_ex...) end

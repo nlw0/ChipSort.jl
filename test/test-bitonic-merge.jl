@@ -3,6 +3,7 @@ using Test
 using ChipSort
 using SIMD
 
+include("testutils.jl")
 
 @testset "Bitonic Merge" begin
 
@@ -68,20 +69,23 @@ end
 end
 
 
-function test_merge_interleaved(T, N, L)
-    va = [Vec(tuple(sort(rand(T, N))...)) for l in 1:L]
-    vb = [Vec(tuple(sort(rand(T, N))...)) for l in 1:L]
-    vv = [a for aa in zip(va, vb) for a in aa]
-    mm = [bitonic_merge_interleaved(vv...)...]
-    ref = [x for xx in [bitonic_merge(aa...) for aa in zip(va, vb)] for x in xx]
-    @test all(all(x) for x in (mm .== ref))
+function test_merge_interleaved(T, V, J, K)
+    aa = randa(T, V*J*K)
+    for k in 1:K
+        sort!(@view aa[1+(k-1)*J*V:k*J*V])
+    end
+
+    srt = chipsort_merge_medium(aa, Val(V), Val(J), Val(K))
+    @test srt == sort(aa)
 end
 
 @testset "Basic bitonic merge interleaved" begin
     for T in [Int8, Int32, Float64]
-        for N in 2 .^ (2:3)
-            for L in [2,8]
-                test_merge_interleaved(T,N,L)
+        for V in 2 .^ (2:3)
+            for J in [2,8]
+                for K in [2,4]
+                    test_merge_interleaved(T,V,J,K)
+                end
             end
         end
     end
