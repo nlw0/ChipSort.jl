@@ -9,38 +9,19 @@ using SIMD
 """
 function chipsort_medium!(input::AbstractVector{T}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
 
-    # println("input")
-    # display(reshape(input, V,:))
-
     sort_vecs!(input, Val(J), Val(V), Val(true))
-    # println("sortvecs")
-    # display(reshape(input, J,:))
 
     vectorized_combsort!(input, Val(J))
-    # println("combsort")
-    # display(reshape(input, J,:))
 
     transpose_chunks!(input, Val(V), Val(J))
-    # println("transchunks")
-    # display(reshape(input, J,:))
+
     transpose!(input, Val(V), Val(K), Val(J))
-    # input .= transpose(reshape(input, J, :))[:]
-    # println("trans")
-    # display(reshape(input, J,:))
 
     vectorized_combsort!(input, Val(J))
-    # println("combsort2")
-    # display(reshape(input, J,:))
 
     sort_vecs!(input, Val(V), Val(J), Val(false))
-    # println("sortvecs2")
-    # display(reshape(input, J,:))
 
     insertion_sort!(input)
-    # println("insertionsrt")
-    # combsort!(input, 1+div(2*length(input), J))
-    # println("combosrt2")
-    # display(reshape(input, V,:))
 
     input
 end
