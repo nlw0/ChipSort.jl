@@ -7,34 +7,38 @@ using SIMD
  - Transpose in-place.
  - Finish with insertion sort over the nearly sorted array.
 """
-function chipsort_medium!(input::AbstractArray{T,1}, ::Val{V}, ::Val{L}) where {T,V,L}
+function chipsort_medium!(input::AbstractVector{T}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
 
     # println("input")
     # display(reshape(input, V,:))
 
-    sort_vecs!(input, Val(L), Val(V), Val(true))
+    sort_vecs!(input, Val(J), Val(V), Val(true))
     # println("sortvecs")
-    # display(reshape(input, L,:))
+    # display(reshape(input, J,:))
 
-    vectorized_combsort!(input, Val(L))
+    vectorized_combsort!(input, Val(J))
     # println("combsort")
-    # display(reshape(input, L,:))
+    # display(reshape(input, J,:))
 
-    input .= transpose(reshape(input, L, :))[:]
+    transpose_chunks!(input, Val(V), Val(J))
+    # println("transchunks")
+    # display(reshape(input, J,:))
+    transpose!(input, Val(V), Val(K), Val(J))
+    # input .= transpose(reshape(input, J, :))[:]
     # println("trans")
-    # display(reshape(input, L,:))
+    # display(reshape(input, J,:))
 
-    vectorized_combsort!(input, Val(L))
+    # vectorized_combsort!(input, Val(J))
     # println("combsort2")
-    # display(reshape(input, L,:))
+    # display(reshape(input, J,:))
 
-    sort_vecs!(input, Val(V), Val(L), Val(false))
+    # sort_vecs!(input, Val(V), Val(J), Val(false))
     # println("sortvecs2")
-    # display(reshape(input, L,:))
+    # display(reshape(input, J,:))
 
-    insertion_sort!(input)
+    # insertion_sort!(input)
     # println("insertionsrt")
-    # combsort!(input, 1+div(2*length(input), L))
+    # combsort!(input, 1+div(2*length(input), J))
     # println("combosrt2")
     # display(reshape(input, V,:))
 

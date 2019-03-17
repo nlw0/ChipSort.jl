@@ -1,6 +1,20 @@
 using SIMD
 
 
+function transpose_chunks!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
+    chunk_size = V*J
+    num_chunks = div(length(data), chunk_size)
+
+    for k in 1:num_chunks
+        chunk = ntuple(l->vload(Vec{V, T}, data, 1 + (k-1)*chunk_size + (l-1)*V), J)
+        transposed_chunk = transpose_vecs(chunk...)
+        for v in 1:V
+            vstore(transposed_chunk[v], data, 1 + (k-1)*chunk_size + (v-1)*J)
+        end
+    end
+    data
+end
+
 """In-place transpose of a 3 dimensianal array VKJ into VJK."""
 @generated function transpose!(data::AbstractVector{T}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
     seeds = find_transpose_cycles(Val(K), Val(J))
@@ -26,7 +40,7 @@ end
     nothing
 end
 
-"""Find the cycle seeds to transpose a matrix with K rows and J columns into J columns and K rows."""
+"""Find the cycle seeds to transpose a matrix with K rows and J columns into J rows and K columns."""
 function find_transpose_cycles(::Val{J}, ::Val{K}) where {J,K}
     cycles = BitSet(1:K*J-2)
     cycle_seeds = Int32[]
