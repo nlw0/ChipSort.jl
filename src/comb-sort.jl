@@ -28,15 +28,15 @@ function chipsort_medium!(input::AbstractVector{T}, ::Val{V}, ::Val{J}, ::Val{K}
     # println("trans")
     # display(reshape(input, J,:))
 
-    # vectorized_combsort!(input, Val(J))
+    vectorized_combsort!(input, Val(J))
     # println("combsort2")
     # display(reshape(input, J,:))
 
-    # sort_vecs!(input, Val(V), Val(J), Val(false))
+    sort_vecs!(input, Val(V), Val(J), Val(false))
     # println("sortvecs2")
     # display(reshape(input, J,:))
 
-    # insertion_sort!(input)
+    insertion_sort!(input)
     # println("insertionsrt")
     # combsort!(input, 1+div(2*length(input), J))
     # println("combosrt2")

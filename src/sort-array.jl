@@ -3,7 +3,7 @@ using SIMD
 sort_small_array(chunk::NTuple{L, Vec{N,T}}) where {L,N,T} =
     merge_vecs(transpose_vecs(sort_net(chunk...)...)...)
 
-function sort_chunks(output, data::Array{T, 1}, ::Val{L}, ::Val{N}) where {L,N,T}
+function sort_chunks(output, data::AbstractVector{T}, ::Val{L}, ::Val{N}) where {L,N,T}
     chunk_size = N*L
     num_chunks = div(length(data), chunk_size)
 
@@ -56,7 +56,7 @@ function merge_chunks(output, data, ::Val{L}, ::Val{N}) where {L,N}
     output
 end
 
-function chipsort(data::Vector{T}, ::Val{N}, ::Val{L}, ::Val{N2}) where {T, N, L, N2}
+function chipsort(data::AbstractVector{T}, ::Val{N}, ::Val{L}, ::Val{N2}) where {T, N, L, N2}
     chunk_size = L * N
     L2 = div(chunk_size, N2)
 

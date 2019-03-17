@@ -54,3 +54,7 @@ To find out more about the performance gains ChipSort can provide, check our [be
 - [SortingNetworks.jl](https://github.com/JeffreySarnoff/SortingNetworks.jl)
 - [SortingAlgorithms.jl](https://github.com/JuliaCollections/SortingAlgorithms.jl)
 - [SortingLab.jl](https://github.com/xiaodaigh/SortingLab.jl)
+
+### Other languages
+
+- [ultra-sort](https://github.com/PatwinchIR/ultra-sort)
