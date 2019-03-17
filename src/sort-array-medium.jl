@@ -39,16 +39,6 @@ function merge_vecs_tree(input::AbstractArray{T,A}, ::Val{C}, ::Val{N}, ::Val{L}
     end
 end
 
-function chipsort_medium_old(input::AbstractArray{T,A}, ::Val{C}, ::Val{N}, ::Val{L}) where {A,T,C,N,L}
-    output = valloc(T, div(32, sizeof(T)), size(input,1))
-    p=1
-    for chunk in merge_vecs_tree(input, Val(C), Val(N), Val(L))
-        vstore(chunk, output, p)
-        p+=N*L
-    end
-    output
-end
-
 
 function chipsort_merge_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
     output = valloc(T, div(32,sizeof(T)), V*J*K)

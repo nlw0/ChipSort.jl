@@ -6,7 +6,8 @@ export
     transpose_vecs, transpose_chunks!, transpose_vecs_tall, transpose_vecs_wide, transpose!,
     bitonic_merge, merge_vecs, build_multi_merger, bitonic_merge_interleaved,
     DataBuffer, MergeNode, pop!,
-    chipsort, chipsort_medium!, sort_chunks, sort_vecs!, merge_vecs_tree, sort_small_array, combsort!, insertion_sort!,
+    chipsort, chipsort_medium!, chipsort_medium_old, sort_chunks, sort_vecs!,
+    merge_vecs_tree, sort_small_array, combsort!, insertion_sort!,
     chipsort_merge_medium
 
 
