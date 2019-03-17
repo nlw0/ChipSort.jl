@@ -179,7 +179,7 @@ Merges K pairs of vectors using a bitonic sort network, with interleaved executi
     input::Array{Ptr{T},1},
     ::Val{V},
     J,
-    ::Val{K},
+    ::Val{K}
 ) where {T,V,K}
 
     allex = []
