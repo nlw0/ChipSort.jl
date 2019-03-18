@@ -46,3 +46,5 @@ julia> bigdata = rand(Int16, 256);
 julia> chipsort(bigdata, Val(8), Val(8), Val(8)) == sort(bigdata)
 true
 ```
+
+Latest benchmark results (106% speedup on a 8k Int32 array) https://gist.github.com/nlw0/9f812baaaa02f6b18a49a1dd97897acc
