@@ -161,11 +161,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api/#ChipSort.bitonic_merge_interleaved-Union{Tuple{Vararg{Vec{N,T},L}}, Tuple{T}, Tuple{N}, Tuple{L}} where T where N where L",
+    "location": "api/#ChipSort.bitonic_merge_interleaved-Union{Tuple{K}, Tuple{V}, Tuple{T}, Tuple{AbstractArray{T,3},Array{Ptr{T},1},Val{V},Any,Val{K}}} where K where V where T",
     "page": "API",
     "title": "ChipSort.bitonic_merge_interleaved",
     "category": "method",
-    "text": "bitonic_merge_interleaved(input::Vec{N,T}...)\n\nMerges multiple pairs of SIMD.Vec objects of the same type and size using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Returns a tuple with pairs of vectors with the first and second halves of the merged sequences.\n\n\n\n\n\n"
+    "text": "bitonic_merge_interleaved(output_a, output_b, input_a, input_b, Val(N))\n\nMerges K pairs of vectors using a bitonic sort network, with interleaved execution. The inputs are assumed to be sorted. Inputs and outputs are acessed directly in memory.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#ChipSort.chipsort_medium!-Union{Tuple{K}, Tuple{J}, Tuple{V}, Tuple{T}, Tuple{AbstractArray{T,1},Val{V},Val{J},Val{K}}} where K where J where V where T",
+    "page": "API",
+    "title": "ChipSort.chipsort_medium!",
+    "category": "method",
+    "text": "Medium arrays are supposed to be as big as cache L1 or L2. Our recipe is:\n\nGenerate small sorted vectors.\nUse vectorized Comb sort.\nTranspose in-place.\nFinish with insertion sort over the nearly sorted array.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#ChipSort.combsort!-Union{Tuple{AbstractArray{T,1}}, Tuple{T}, Tuple{AbstractArray{T,1},Any}} where T",
+    "page": "API",
+    "title": "ChipSort.combsort!",
+    "category": "method",
+    "text": "Regular version of Comb sort.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#ChipSort.insertion_sort!-Tuple{AbstractArray{T,1} where T}",
+    "page": "API",
+    "title": "ChipSort.insertion_sort!",
+    "category": "method",
+    "text": "Insertion sort, adapted from the Julia codebase.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#ChipSort.merge_vecs-Union{Tuple{Vararg{Vec{N,T},L}}, Tuple{T}, Tuple{N}, Tuple{L}} where T where N where L",
+    "page": "API",
+    "title": "ChipSort.merge_vecs",
+    "category": "method",
+    "text": "merge_vecs(input...)\n\nThis brave function merges 4, 8 vectors or even more. Relies on the great ability from SIMD.jl and LLVM to handle large vectors. Performance not yet tested.\n\n\n\n\n\n"
 },
 
 {
@@ -177,11 +209,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#ChipSort.transpose!-Union{Tuple{K}, Tuple{J}, Tuple{V}, Tuple{T}, Tuple{AbstractArray{T,1},Val{V},Val{J},Val{K}}} where K where J where V where T",
+    "page": "API",
+    "title": "ChipSort.transpose!",
+    "category": "method",
+    "text": "In-place transpose of a 3 dimensianal array VKJ into VJK.\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#ChipSort.transpose_vecs-Union{Tuple{Vararg{Vec{N,T},L}}, Tuple{T}, Tuple{N}, Tuple{L}} where T where N where L",
     "page": "API",
     "title": "ChipSort.transpose_vecs",
     "category": "method",
     "text": "transpose_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}\n\nTransposes a matrix of L vectors of size N into N vectors of size L. Sizes should be powers of 2.\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#ChipSort.find_transpose_cycles-Union{Tuple{K}, Tuple{J}, Tuple{Val{J},Val{K}}} where K where J",
+    "page": "API",
+    "title": "ChipSort.find_transpose_cycles",
+    "category": "method",
+    "text": "Find the cycle seeds to transpose a matrix with K rows and J columns into J rows and K columns.\n\n\n\n\n\n"
 },
 
 {
