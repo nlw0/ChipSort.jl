@@ -18,7 +18,19 @@ function sort_chunks(output, data::AbstractVector{T}, ::Val{L}, ::Val{N}) where 
     output
 end
 
-function sort_vecs!(data::AbstractVector{T}, ::Val{L}, ::Val{N}, ::Val{Transpose}) where {L,N,T,Transpose}
+function sort_chunks!(data::AbstractVector{T}, ::Val{L}, ::Val{N}) where {L,N,T}
+    chunk_size = N*L
+    num_chunks = div(length(data), chunk_size)
+
+    for m in 1:num_chunks
+        chunk = ntuple(l->vload(Vec{N, T}, data, 1 + (m-1)*chunk_size + (l-1)*N), L)
+        sorted_chunk = sort_small_array(chunk)
+        vstore(sorted_chunk, data, 1 + (m-1)*(N*L))
+    end
+    data
+end
+
+function sort_vecs!(data::AbstractVector{T}, ::Val{L}, ::Val{N}, ::Val{Transpose}=Val{true}) where {L,N,T,Transpose}
     chunk_size = N*L
     num_chunks = div(length(data), chunk_size)
 

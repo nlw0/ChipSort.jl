@@ -13,13 +13,13 @@ data = randa(Int32, 2^13)
 ref = sort(data)
 @test chipsort_medium!(data, Val(8), Val(8), Val(128)) == ref
 
-data = randa(Int32, 2^13)
-ref = sort(data)
-@test chipsort_merge_medium(data,Val(8),Val(8),Val(128)) == ref
+# data = randa(Int32, 2^13)
+# ref = sort(data)
+# @test chipsort_merge_medium(data,Val(8),Val(8),Val(128)) == ref
 
-data = randa(Int32, 2^7)
-ref = sort(data)
-@test combsort!(copy(data)) == ref
+# data = randa(Int32, 2^7)
+# ref = sort(data)
+# @test combsort!(copy(data)) == ref
 # @test combsort!(data, 2^6) == ref
 
 data = randa(Int32, 2^6)
