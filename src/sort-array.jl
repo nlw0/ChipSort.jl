@@ -1,5 +1,29 @@
 using SIMD
 
+function chipsort_small!(data, ::Val{V}, ::Val{J}) where {V,J}
+    sort_single_chunk!(data, Val(V), Val(J))
+    chipsort_merge_medium(data, Val(V), Val(1), Val(J))
+end
+
+@generated function sort_single_chunk!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
+    ex = [Expr(:meta, :inline)]
+
+    for j in 1:J
+        v = Symbol("input_", j)
+        push!(ex, :($v = vloada(Vec{V,T}, pointer(@view data[1+($j-1)*V:$j*V]))))
+    end
+    vecs=[Symbol("input_", j) for j in 1:J]
+    aecs=[Symbol("output_", v) for v in 1:V]
+    call = Expr(:(=), :($(aecs...),), :(transpose_vecs(sort_net($(vecs...))...)))
+    push!(ex, call)
+
+    for v in 1:V
+        o=Symbol("output_", v)
+        push!(ex, :(@inbounds vstorea($o, pointer(@view data[1+($v-1)*J:$v*J]))))
+    end
+    quote $(ex...) end
+end
+
 sort_small_array(chunk::NTuple{L, Vec{N,T}}) where {L,N,T} =
     merge_vecs(transpose_vecs(sort_net(chunk...)...)...)
 

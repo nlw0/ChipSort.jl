@@ -33,10 +33,12 @@ function sort_chunks_baseline!(data, chunk_size)
 end
 
 T=Int32
-K=128
+K=1
 V=2^3
 J=2^3
 len = V*J*K
-SUITE["Array64Int32"] = BenchmarkGroup(["size-small", "Int32"])
-SUITE["Array64Int32"]["JuliaStd"] = @benchmarkable sort_chunks_baseline!(data, V*J) setup=(data = randa($T, $len))
-SUITE["Array64Int32"]["ChipSort"] = @benchmarkable sort_chunks!(data, Val(V), Val(J)) setup=(data = randa($T, $len))
+SUITE["Array64Int32"] = BenchmarkGroup(["size-small", "Int8"])
+SUITE["Array64Int32"]["JuliaStd"] = @benchmarkable sort!(data) setup=(data = randa($T, $len))
+SUITE["Array64Int32"]["ChipSort"] = @benchmarkable chipsort_small!(data, Val(V), Val(J)) setup=(data = randa($T, $len))
+SUITE["Array8kInt32"]["CombSort"] = @benchmarkable combsort!(data) setup=(data = randa($T, $len))
+SUITE["Array8kInt32"]["InsertionSort"] = @benchmarkable insertion_sort!(data) setup=(data = randa($T, $len))
