@@ -40,5 +40,5 @@ len = V*J*K
 SUITE["Array64Int32"] = BenchmarkGroup(["size-small", "Int8"])
 SUITE["Array64Int32"]["JuliaStd"] = @benchmarkable sort!(data) setup=(data = randa($T, $len))
 SUITE["Array64Int32"]["ChipSort"] = @benchmarkable chipsort_small!(data, Val(V), Val(J)) setup=(data = randa($T, $len))
-SUITE["Array8kInt32"]["CombSort"] = @benchmarkable combsort!(data) setup=(data = randa($T, $len))
-SUITE["Array8kInt32"]["InsertionSort"] = @benchmarkable insertion_sort!(data) setup=(data = randa($T, $len))
+SUITE["Array64Int32"]["CombSort"] = @benchmarkable combsort!(data) setup=(data = randa($T, $len))
+SUITE["Array64Int32"]["InsertionSort"] = @benchmarkable insertion_sort!(data) setup=(data = randa($T, $len))
