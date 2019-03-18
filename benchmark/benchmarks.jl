@@ -38,5 +38,5 @@ V=2^3
 J=2^3
 len = V*J*K
 SUITE["Array64Int32"] = BenchmarkGroup(["size-small", "Int32"])
-SUITE["Array64Int32"]["JuliaStd"] = @benchmarkable sort_chunks_baseline!(data, V*J), setup=(data = randa($T, $len))
+SUITE["Array64Int32"]["JuliaStd"] = @benchmarkable sort_chunks_baseline!(data, V*J) setup=(data = randa($T, $len))
 SUITE["Array64Int32"]["ChipSort"] = @benchmarkable sort_chunks!(data, Val(V), Val(J)) setup=(data = randa($T, $len))
