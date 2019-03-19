@@ -81,7 +81,7 @@ end
 
 This brave function merges 4, 8 vectors or even more. Relies on the great ability from SIMD.jl and LLVM to handle
 large vectors. Performance not yet tested."""
-@generated function merge_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}
+@generated function merge_vecs(input::Vararg{Vec{N,T}, L})::Vec{N*L,T} where {L,N,T}
 
     ex = [Expr(:meta, :inline)]
 

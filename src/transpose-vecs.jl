@@ -65,7 +65,7 @@ end
 
 Transposes a matrix of L vectors of size N into N vectors of size L. Sizes should be powers of 2.
 """
-@generated function transpose_vecs(input::Vararg{Vec{N,T}, L}) where {L,N,T}
+@generated function transpose_vecs(input::Vararg{Vec{N,T}, L})::Vararg{N, Vec{L,T}} where {L,N,T}
 
     ex = Expr[Expr(:meta, :inline)]
 

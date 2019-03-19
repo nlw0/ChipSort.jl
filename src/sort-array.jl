@@ -1,13 +1,6 @@
 using SIMD
 
-function chipsort_small!(data, ::Val{V}, ::Val{J}) where {V,J}
-    sort_single_chunk!(data, Val(V), Val(J))
-    insertion_sort!(data)
-    chipsort_merge_medium(data, Val(V), Val(J))
-    # merge_stuff(data, Val(V), Val(1), Val(J))
-end
-
-@generated function sort_single_chunk!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
+@generated function chipsort_small!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
     ex = [Expr(:meta, :inline)]
 
     for j in 1:J
@@ -15,16 +8,11 @@ end
         push!(ex, :($v = vloada(Vec{V,T}, pointer(data, 1+($j-1)*V))))
     end
     vecs=[Symbol("input_", j) for j in 1:J]
-    aecs=[Symbol("output_", v) for v in 1:V]
-    call = Expr(:(=), :($(aecs...),), :(transpose_vecs(sort_net($(vecs...))...)))
-    # call = Expr(:(=), :($(aecs...),), :(sort_net($(vecs...))))
-    push!(ex, call)
-
-    for v in 1:V
-        o=Symbol("output_", v)
-        push!(ex, :(@inbounds vstorea($o, pointer(data, 1+($v-1)*J))))
-        # push!(ex, :(@inbounds vstorea($o, pointer(@view data[1+($v-1)*V:$v*V]))))
-    end
+    append!(ex, [
+        :(output = merge_vecs(transpose_vecs(sort_net($(vecs...))...)...)),
+        :(vstorea(output, pointer(data, 1))),
+        :(return nothing)
+    ])
     quote $(ex...) end
 end
 

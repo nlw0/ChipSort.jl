@@ -3,4 +3,4 @@
 docs/build/
 src/*cov
 test/*cov
-bench/.ipynb_checkpoints/
+benchmark/tune.json
