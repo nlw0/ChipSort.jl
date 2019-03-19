@@ -47,4 +47,6 @@ julia> chipsort(bigdata, Val(8), Val(8), Val(8)) == sort(bigdata)
 true
 ```
 
-Latest benchmark results (106% speedup on a 8k Int32 array) https://gist.github.com/nlw0/9f812baaaa02f6b18a49a1dd97897acc
+Make sure you check [our documentation](https://nlw0.github.io/ChipSort.jl) for more information.
+
+Latest benchmark results (2x speedup on a 8k Int32 array and 17x on 64 values) https://gist.github.com/nlw0/10dbb56de51e2b411149f21c36dd80bb

@@ -5,12 +5,12 @@ using SIMD
 
     for j in 1:J
         v = Symbol("input_", j)
-        push!(ex, :($v = vloada(Vec{V,T}, pointer(data, 1+($j-1)*V))))
+        push!(ex, :($v = vload(Vec{V,T}, pointer(data, 1+($j-1)*V))))
     end
     vecs=[Symbol("input_", j) for j in 1:J]
     append!(ex, [
         :(output = merge_vecs(transpose_vecs(sort_net($(vecs...))...)...)),
-        :(vstorea(output, pointer(data, 1))),
+        :(vstore(output, pointer(data, 1))),
         :(return nothing)
     ])
     quote $(ex...) end
