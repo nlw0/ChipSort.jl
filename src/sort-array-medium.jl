@@ -70,6 +70,21 @@ function chipsort_merge_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::
     )
 end
 
+function merge_stuff(input::AbstractArray{T,1}, ::Val{V}, ::Val{K}) where {T,V,K}
+    J=1
+    new_input = reshape(input, V, J, K)
+
+    chunks_a = [(@view new_input[:,1:end,c*2-1]) for c in 1:K>>1]
+    chunks_b = [(@view new_input[:,1:end,c*2]) for c in 1:K>>1]
+
+    do_merge_pass(
+        new_input,
+        reshape(valloc(T, div(32,sizeof(T)), V*J*K), V, J<<1, K>>1),
+        chunks_a, chunks_b,
+        Val(V), Val(J<<1), Val(K>>1)
+    )
+end
+
 @inline function do_merge_pass(input::AbstractArray{T,3}, output::AbstractArray{T,3}, chunks_a, chunks_b,::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
 
     for c in 1:K
