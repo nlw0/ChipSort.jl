@@ -56,17 +56,11 @@ end
 """Insertion sort, adapted from the Julia codebase."""
 @inline function insertion_sort!(v::AbstractVector)
     lo, hi = 1, length(v)
-    # madi = 0
-    # culprit = 0
     @inbounds for i = lo+1:hi
         j = i
         x = v[i]
         while j > lo
             if x <= v[j-1]
-                # if madi < i-j
-                    # madi = max(madi, i-j)
-                    # culprit = x
-                # end
                 v[j] = v[j-1]
                 j -= 1
                 continue
@@ -75,7 +69,6 @@ end
         end
         v[j] = x
     end
-    # @show madi, culprit
     return v
 end
 
@@ -91,7 +84,6 @@ function combsort!(input::AbstractArray{T,1}, initial_interval=nothing::Union{No
     end
 
     @inbounds while interval > 1
-        # @show 2, interval
         for i in 1:la-interval
             a1 = input[i]
             a2 = input[i+interval]
@@ -104,7 +96,6 @@ function combsort!(input::AbstractArray{T,1}, initial_interval=nothing::Union{No
     change = true
     interval=1
     @inbounds while change
-        # @show 3, interval
         change = false
         for i in 1:la-1
             if input[i] > input[i+1]
