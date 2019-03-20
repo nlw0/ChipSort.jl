@@ -39,16 +39,16 @@ function merge_vecs_tree(input::AbstractArray{T,A}, ::Val{C}, ::Val{N}, ::Val{L}
     end
 end
 
+sort_small_array(chunk::NTuple{L, Vec{N,T}}) where {L,N,T} =
+    merge_vecs(transpose_vecs(sort_net(chunk...)...)...)
+
 
 function chipsort_merge_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
     output = valloc(T, div(32,sizeof(T)), V*J*K)
 
     if J>1
-        for cc in 1:K
-            chunks = ntuple(l->vloada(Vec{V, T}, input, 1+(cc-1)*V*J + (l-1)*V), J) ::NTuple{J, Vec{V,T}}
-            srt = sort_small_array(chunks) ::Vec{V*J,T}
-            vstorea(srt, output, 1+(cc-1)*V*J)
-        end
+        output .= input
+        sort_chunks!(output, Val(J), Val(V))
     else
         for cc in 1:K
             chunk = ntuple(v->input[v+(cc-1)*V], V)

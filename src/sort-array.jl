@@ -1,6 +1,8 @@
 using SIMD
 
-@generated function chipsort_small!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
+chipsort_small!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J} = sort_chunk!(data, Val(V), Val(J))
+
+@generated function sort_chunk!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
     ex = [Expr(:meta, :inline)]
 
     for j in 1:J
@@ -11,27 +13,9 @@ using SIMD
     append!(ex, [
         :(output = merge_vecs(transpose_vecs(sort_net($(vecs...))...)...)),
         :(vstore(output, pointer(data, 1))),
-        :(return nothing)
+        :(return data)
     ])
     quote $(ex...) end
-end
-
-sort_small_array(chunk::NTuple{L, Vec{N,T}}) where {L,N,T} =
-    merge_vecs(transpose_vecs(sort_net(chunk...)...)...)
-
-function sort_chunks(output, data::AbstractVector{T}, ::Val{L}, ::Val{N}) where {L,N,T}
-    chunk_size = N*L
-    num_chunks = div(length(data), chunk_size)
-
-    for m in 1:num_chunks
-        # chunk = @view chunks[:, m]
-        # ntuple(l->vload(Vec{N, T}, chunk, 1+(l-1)*N), L)
-
-        chunk = ntuple(l->vload(Vec{N, T}, data, 1 + (m-1)*chunk_size + (l-1)*N), L)
-        sorted_chunk = sort_small_array(chunk)
-        vstorent(sorted_chunk, output, 1 + (m-1)*(N*L))
-    end
-    output
 end
 
 function sort_chunks!(data::AbstractVector{T}, ::Val{L}, ::Val{N}) where {L,N,T}
@@ -39,9 +23,7 @@ function sort_chunks!(data::AbstractVector{T}, ::Val{L}, ::Val{N}) where {L,N,T}
     num_chunks = div(length(data), chunk_size)
 
     for m in 1:num_chunks
-        chunk = ntuple(l->vload(Vec{N, T}, data, 1 + (m-1)*chunk_size + (l-1)*N), L)
-        sorted_chunk = sort_small_array(chunk)
-        vstore(sorted_chunk, data, 1 + (m-1)*(N*L))
+        sort_chunk!((@view data[1 + (m-1)*chunk_size:m*chunk_size]), Val(N), Val(L))
     end
     data
 end
@@ -91,8 +73,10 @@ function chipsort(data::AbstractVector{T}, ::Val{N}, ::Val{L}, ::Val{N2}) where 
     Nchunks = div(size(data, 1), chunk_size)
 
     output1 = valloc(T, div(32, sizeof(T)), length(data))
+    output1 .= data
+    sort_chunks!(output1, Val(L), Val(N))
+
     output2 = valloc(T, div(32, sizeof(T)), length(data))
-    sort_chunks(output1, data, Val(L), Val(N))
     merge_chunks(output2, output1, Val(L2), Val(N2))
     output2
 end
