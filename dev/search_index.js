@@ -209,6 +209,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#ChipSort.sort_vecs!-Union{Tuple{Merge}, Tuple{Transpose}, Tuple{T}, Tuple{J}, Tuple{V}, Tuple{AbstractArray{T,1},Val{J},Val{V}}, Tuple{AbstractArray{T,1},Val{J},Val{V},Val{Transpose}}, Tuple{AbstractArray{T,1},Val{J},Val{V},Val{Transpose},Val{Merge}}} where Merge where Transpose where T where J where V",
+    "page": "API",
+    "title": "ChipSort.sort_vecs!",
+    "category": "method",
+    "text": "Sort chunks from the input array, optionally transposing to generate sorted sequences of size V (default), or further merging those into sequences of size V*L.\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#ChipSort.transpose!-Union{Tuple{K}, Tuple{J}, Tuple{V}, Tuple{T}, Tuple{AbstractArray{T,1},Val{V},Val{J},Val{K}}} where K where J where V where T",
     "page": "API",
     "title": "ChipSort.transpose!",
