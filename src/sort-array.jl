@@ -28,29 +28,35 @@ function sort_chunks!(data::AbstractVector{T}, ::Val{L}, ::Val{N}) where {L,N,T}
     data
 end
 
-function sort_vecs!(data::AbstractVector{T}, ::Val{L}, ::Val{N}, ::Val{Transpose}=Val{true}) where {L,N,T,Transpose}
-    chunk_size = N*L
-    num_chunks = div(length(data), chunk_size)
+"""Sort chunks from the input array, optionally transposing to generate sorted sequences of size V (default), or further
+merging those into sequences of size V*L."""
+function sort_vecs!(input::AbstractVector{T}, ::Val{J}, ::Val{V}, ::Val{Transpose}=Val(true), ::Val{Merge}=Val(false)) where {V,J,T,Transpose,Merge}
+    chunk_size = V*J
+    num_chunks = div(length(input), chunk_size)
 
     for m in 1:num_chunks
-        chunk = ntuple(l->vload(Vec{N, T}, data, 1 + (m-1)*chunk_size + (l-1)*N), L)
-        sorted_vecs = if Transpose
+        chunk = ntuple(j->vload(Vec{V, T}, input, 1 + (m-1)*chunk_size + (j-1)*V), J)
+        sorted_vecs = if Merge
+            merge_vecs(transpose_vecs(sort_net(chunk...)...)...)
+        elseif Transpose
             transpose_vecs(sort_net(chunk...)...)
         else
             sort_net(chunk...)
         end
 
-        if Transpose
-            for n in 1:N
-                vstorent(sorted_vecs[n], data, 1 + (m-1)*(N*L) + (n-1)*L)
+        if Merge
+            vstorent(sorted_vecs, input, 1 + (m-1)*(V*J))
+        elseif Transpose
+            for v in 1:V
+                vstorent(sorted_vecs[v], input, 1 + (m-1)*(V*J) + (v-1)*J)
             end
         else
-            for n in 1:L
-                vstorent(sorted_vecs[n], data, 1 + (m-1)*(N*L) + (n-1)*N)
+            for j in 1:J
+                vstorent(sorted_vecs[j], input, 1 + (m-1)*(V*J) + (j-1)*V)
             end
         end
     end
-    nothing
+    input
 end
 
 function merge_chunks(output, data, ::Val{L}, ::Val{N}) where {L,N}

@@ -138,3 +138,42 @@ end
         )
     end
 end
+
+function merge_ng(input_a::AbstractVector{T}, input_b::AbstractVector{T}, ::Val{V}, ::Val{Ja}, ::Val{Jb}) where {T,V,Ja,Jb}
+    pa = pointer(input_a, 1)
+    pb = pointer(input_b, 1)
+    output = valloc(T, div(32,sizeof(T)), V*(Ja+Jb))
+    pout = pointer(output, 1)
+    enda = pa+Ja*V*sizeof(T)
+    endb = pb+Jb*V*sizeof(T)
+
+    # Always load from "a", then compare va and vb. If we use va, go on. otherwise we just flip both va-vb and pa-pb
+    va = vload(Vec{V,T}, pa)
+    pa += V*sizeof(T)
+    vb = vload(Vec{V,T}, pb)
+    pb += V*sizeof(T)
+
+    if pa>enda || pb<=endb && vb[1] < va[1]
+        va,vb,pa,pb,enda,endb = vb,va,pb,pa,endb,enda
+    end
+    state = va
+
+    va = vload(Vec{V,T}, pa)
+    pa += V*sizeof(T)
+
+    for it in 1:(Ja+Jb-1)
+        if pa>enda || pb<=endb && vb[1] < va[1]
+            va,vb,pa,pb,enda,endb = vb,va,pb,pa,endb,enda
+        end
+        # @show it, enda-pa, endb-pb
+        # @show it, state, va,vb
+        out, state = bitonic_merge(state, va)
+        va = vload(Vec{V,T}, pa)
+        pa += V*sizeof(T)
+        vstore(out, pout)
+        pout += V*sizeof(T)
+    end
+    vstore(state, pout)
+    pout += V*sizeof(T)
+    output
+end
