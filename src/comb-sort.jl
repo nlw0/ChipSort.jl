@@ -23,7 +23,7 @@ function chipsort_medium!(input::AbstractVector{T}, ::Val{V}, ::Val{J}, ::Val{K}
 
     vectorized_combsort!(input, Val(J))
 
-    transpose_chunks!(input, Val(V), Val(J))
+    transpose_blocks!(input, Val(V), Val(J))
 
     transpose!(input, Val(V), Val(K), Val(J))
 

@@ -24,7 +24,7 @@ For larger arrays, ChipSort employs two stages. The first stage utilizes the sam
 
 The second stage is to perform a multi-way merge of all these small sequences. They are all processed at the same time, split in small buffers which are input to the bitonic merge network. This procedure requires a binary tree that stores intermediate merged sub-sequences. This structure should fit in the cache memory.
 
-With just two passes over the whole data in the RAM this approach can already handle thousands of entries. If the input array is so large that the merge tree is too big for the cache, then we perform more multi-way merge stages with an increasingly large chunk size.
+With just two passes over the whole data in the RAM this approach can already handle thousands of entries. If the input array is so large that the merge tree is too big for the cache, then we perform more multi-way merge stages with an increasingly large block size.
 
 The main alternative technique, not explered here at first, is based on radix sort (≈quicksort). The memory access issues can be dealt with by software managed buffers that concentrate data in the lower caches. Another technique such as sorting networks or combosort must still be employed for small arrays.
 

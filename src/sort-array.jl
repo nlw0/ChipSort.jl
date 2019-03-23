@@ -12,9 +12,9 @@ julia> chipsort_small!(Int32[1:16...] .* Int32(1729) .%0x100, Val(4), Val(4))'
  4  8  12  16  67  71  75  79  130  134  138  142  193  197  201  205
 ```
 """
-chipsort_small!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J} = sort_chunk!(data, Val(V), Val(J))
+chipsort_small!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J} = sort_block!(data, Val(V), Val(J))
 
-@generated function sort_chunk!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
+@generated function sort_block!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
     ex = [Expr(:meta, :inline)]
 
     for j in 1:J
@@ -30,30 +30,30 @@ chipsort_small!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J} = sor
     quote $(ex...) end
 end
 
-function sort_chunks!(data::AbstractVector{T}, ::Val{L}, ::Val{N}) where {L,N,T}
-    chunk_size = N*L
-    num_chunks = div(length(data), chunk_size)
+function sort_blocks!(data::AbstractVector{T}, ::Val{L}, ::Val{N}) where {L,N,T}
+    block_size = N*L
+    num_blocks = div(length(data), block_size)
 
-    for m in 1:num_chunks
-        sort_chunk!((@view data[1 + (m-1)*chunk_size:m*chunk_size]), Val(N), Val(L))
+    for m in 1:num_blocks
+        sort_block!((@view data[1 + (m-1)*block_size:m*block_size]), Val(N), Val(L))
     end
     data
 end
 
-"""Sort chunks from the input array, optionally transposing to generate sorted sequences of size V (default), or further
+"""Sort blocks from the input array, optionally transposing to generate sorted sequences of size V (default), or further
 merging those into sequences of size V*L."""
 function sort_vecs!(input::AbstractVector{T}, ::Val{J}, ::Val{V}, ::Val{Transpose}=Val(true), ::Val{Merge}=Val(false)) where {V,J,T,Transpose,Merge}
-    chunk_size = V*J
-    num_chunks = div(length(input), chunk_size)
+    block_size = V*J
+    num_blocks = div(length(input), block_size)
 
-    for m in 1:num_chunks
-        chunk = ntuple(j->vload(Vec{V, T}, input, 1 + (m-1)*chunk_size + (j-1)*V), J)
+    for m in 1:num_blocks
+        block = ntuple(j->vload(Vec{V, T}, input, 1 + (m-1)*block_size + (j-1)*V), J)
         sorted_vecs = if Merge
-            merge_vecs(transpose_vecs(sort_net(chunk...)...)...)
+            merge_vecs(transpose_vecs(sort_net(block...)...)...)
         elseif Transpose
-            transpose_vecs(sort_net(chunk...)...)
+            transpose_vecs(sort_net(block...)...)
         else
-            sort_net(chunk...)
+            sort_net(block...)
         end
 
         if Merge
@@ -71,11 +71,11 @@ function sort_vecs!(input::AbstractVector{T}, ::Val{J}, ::Val{V}, ::Val{Transpos
     input
 end
 
-function merge_chunks(output, data, ::Val{L}, ::Val{N}) where {L,N}
-    chunks = reshape((@view data[:]), L*N, :)
+function merge_blocks(output, data, ::Val{L}, ::Val{N}) where {L,N}
+    blocks = reshape((@view data[:]), L*N, :)
     M = div(length(data), L*N)
 
-    merger = build_multi_merger(Val(N), ntuple(m->(@view chunks[:, m]), M)...)
+    merger = build_multi_merger(Val(N), ntuple(m->(@view blocks[:, m]), M)...)
 
     for itr in 1:L*M
         new_buffer = pop!(merger)
@@ -85,16 +85,16 @@ function merge_chunks(output, data, ::Val{L}, ::Val{N}) where {L,N}
 end
 
 function chipsort(data::AbstractVector{T}, ::Val{N}, ::Val{L}, ::Val{N2}) where {T, N, L, N2}
-    chunk_size = L * N
-    L2 = div(chunk_size, N2)
+    block_size = L * N
+    L2 = div(block_size, N2)
 
-    Nchunks = div(size(data, 1), chunk_size)
+    Nblocks = div(size(data, 1), block_size)
 
     output1 = valloc(T, div(32, sizeof(T)), length(data))
     output1 .= data
-    sort_chunks!(output1, Val(L), Val(N))
+    sort_blocks!(output1, Val(L), Val(N))
 
     output2 = valloc(T, div(32, sizeof(T)), length(data))
-    merge_chunks(output2, output1, Val(L2), Val(N2))
+    merge_blocks(output2, output1, Val(L2), Val(N2))
     output2
 end

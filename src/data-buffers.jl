@@ -6,7 +6,7 @@ abstract type AbstractDataStream end
 mutable struct DataBuffer{N,T}
     head ::Union{Nothing, Vec{N, T}}
     tail ::AbstractArray{T}
-    DataBuffer(chunk_size::Val{N}, data::AbstractArray{T}) where {N,T} = new{N,T}(Vec(tuple(data[1:N]...)), (@view data[N+1:end]))
+    DataBuffer(block_size::Val{N}, data::AbstractArray{T}) where {N,T} = new{N,T}(Vec(tuple(data[1:N]...)), (@view data[N+1:end]))
 end
 
 mutable struct MergeNode{N,T}
@@ -17,13 +17,13 @@ mutable struct MergeNode{N,T}
         new{N,T}(pop!(first_stream(left, right)), left, right)
 end
 
-function build_multi_merger(chunk_size, data...)
+function build_multi_merger(block_size, data...)
     k = length(data)
     if k == 1
-        DataBuffer(chunk_size, data[1])
+        DataBuffer(block_size, data[1])
     else
-        MergeNode(build_multi_merger(chunk_size, data[1:div(k,2)]...),
-                  build_multi_merger(chunk_size, data[1+div(k,2):end]...))
+        MergeNode(build_multi_merger(block_size, data[1:div(k,2)]...),
+                  build_multi_merger(block_size, data[1+div(k,2):end]...))
     end
 end
 

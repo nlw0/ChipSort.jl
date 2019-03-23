@@ -1,15 +1,15 @@
 using SIMD
 
 
-function transpose_chunks!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
-    chunk_size = V*J
-    num_chunks = div(length(data), chunk_size)
+function transpose_blocks!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T,V,J}
+    block_size = V*J
+    num_blocks = div(length(data), block_size)
 
-    for k in 1:num_chunks
-        chunk = ntuple(l->vload(Vec{V, T}, data, 1 + (k-1)*chunk_size + (l-1)*V), J)
-        transposed_chunk = transpose_vecs(chunk...)
+    for k in 1:num_blocks
+        block = ntuple(l->vload(Vec{V, T}, data, 1 + (k-1)*block_size + (l-1)*V), J)
+        transposed_block = transpose_vecs(block...)
         for v in 1:V
-            vstore(transposed_chunk[v], data, 1 + (k-1)*chunk_size + (v-1)*J)
+            vstore(transposed_block[v], data, 1 + (k-1)*block_size + (v-1)*J)
         end
     end
     data

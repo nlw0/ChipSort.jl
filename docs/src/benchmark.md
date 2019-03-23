@@ -1,7 +1,7 @@
 Benchmark
 =========
 
-Some preliminary experiments comparing the ChipSort performance with the Julia standard sort. Here we are not yet sorting a full array, but just trying to verify that the sorting and merge networks with SIMD pay off in the right conditions, sorting a small chunk of data of an appropriate size. Too little elements and there is too much overhead for the parallelism to be relevant. Too many elements and we start hitting the limits of the processor. When does our chip perform best?
+Some preliminary experiments comparing the ChipSort performance with the Julia standard sort. Here we are not yet sorting a full array, but just trying to verify that the sorting and merge networks with SIMD pay off in the right conditions, sorting a small block of data of an appropriate size. Too little elements and there is too much overhead for the parallelism to be relevant. Too many elements and we start hitting the limits of the processor. When does our chip perform best?
 
 This graphic shows the time [eCDF](https://en.wikipedia.org/wiki/Empirical_distribution_function) from times measured in 10,000 trials using BenchmarkTools.jl. The task is to sort 4 consecutive groups of 64 Float32 numbers in a 256 array. "Vector" means a SIMD.jl `Vec` array, that is supposed to _e.g._ sit inside a `YMM` AVX register.
 
@@ -19,13 +19,13 @@ In this next graphic we show the speed of ChipSort relative to the baseline. The
 
 
 
-By increasing the total size of the input array to 16k, although keeping the small size of the chunks we are sorting, the benchmark now results in less variation and also a larger speedup.
+By increasing the total size of the input array to 16k, although keeping the small size of the blocks we are sorting, the benchmark now results in less variation and also a larger speedup.
 
 ```@raw html
 <img src="../assets/chiptime-f32-16k-8x8.png">
 ```
 
-The same bar chart with different chunk sizes still shows that performance might degrade, but at the right situation the proposed technique can reach a relative speed of more than 6 times over the baseline.
+The same bar chart with different block sizes still shows that performance might degrade, but at the right situation the proposed technique can reach a relative speed of more than 6 times over the baseline.
 
 ```@raw html
 <img src="../assets/chipspeed-16k-8.png">
