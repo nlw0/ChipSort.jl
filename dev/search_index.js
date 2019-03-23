@@ -173,7 +173,15 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ChipSort.chipsort_medium!",
     "category": "method",
-    "text": "Medium arrays are supposed to be as big as cache L1 or L2. Our recipe is:\n\nGenerate small sorted vectors.\nUse vectorized Comb sort.\nTranspose in-place.\nFinish with insertion sort over the nearly sorted array.\n\n\n\n\n\n"
+    "text": "chipsort_medium!(data, Val(V), Val(J), Val(K))\n\nSort a medium array in-place. The data is divided between K blocks of J SIMD vectors of size V. The array should typically fit inside lower levels of cache memory (L1 or L2), for instance 8192 Int32 values on an conventional desktop computer. Our recipe is:\n\nGenerate small sorted vectors.\nUse vectorized Comb sort.\nTranspose in-place.\nFinish with insertion sort over the nearly sorted array.\n\nExamples\n\njulia> chipsort_medium!(Int32[1:2^13...] .* 0xf0ca .%0x10000, Val(8), Val(8), Val(64))\'\n1×8192 LinearAlgebra.Adjoint{Int32,Array{Int32,1}}:\n 30  32  34  36  38  70  72  74  76  108  110  112  114  116  …  65488  65490  65492  65494  65496  65528  65530  65532  65534\n\n\n\n\n\n"
+},
+
+{
+    "location": "api/#ChipSort.chipsort_small!-Union{Tuple{J}, Tuple{V}, Tuple{T}, Tuple{AbstractArray{T,1},Val{V},Val{J}}} where J where V where T",
+    "page": "API",
+    "title": "ChipSort.chipsort_small!",
+    "category": "method",
+    "text": "chipsort_small!(data, Val(V), Val(J))\n\nSort a small array using a vectorized sorting network and bitonic merge networks. The initial sort is over J SIMD vectors of size V. The array should typically fit inside register memory, for instance 64 Int32 values on an AVX2 machine.\n\nExamples\n\njulia> chipsort_small!(Int32[1:16...] .* Int32(1729) .%0x100, Val(4), Val(4))\'\n1×16 LinearAlgebra.Adjoint{Int32,Array{Int32,1}}:\n 4  8  12  16  67  71  75  79  130  134  138  142  193  197  201  205\n\n\n\n\n\n"
 },
 
 {
@@ -253,7 +261,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "Functions",
     "category": "section",
-    "text": "CurrentModule = ChipSortModules = [ChipSort]"
+    "text": "CurrentModule = ChipSort\nDocTestSetup = quote\n    using ChipSort\nendModules = [ChipSort]DocTestSetup = nothing"
 },
 
 {
