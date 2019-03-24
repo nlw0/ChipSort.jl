@@ -7,7 +7,7 @@ export
     bitonic_merge, merge_vecs, build_multi_merger, bitonic_merge_interleaved,
     DataBuffer, MergeNode, pop!,
     chipsort, chipsort_small!, chipsort_medium!, chipsort_medium_old, sort_blocks, sort_blocks!, sort_vecs!,
-    merge_vecs_tree, sort_small_array, combsort!, insertion_sort!,
+    merge_vecs_tree, sort_small_array, combsort!, insertion_sort!, merge_ng,
     chipsort_merge_medium
 
 
