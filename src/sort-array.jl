@@ -83,18 +83,3 @@ function merge_blocks(output, data, ::Val{L}, ::Val{N}) where {L,N}
     end
     output
 end
-
-function chipsort(data::AbstractVector{T}, ::Val{N}, ::Val{L}, ::Val{N2}) where {T, N, L, N2}
-    block_size = L * N
-    L2 = div(block_size, N2)
-
-    Nblocks = div(size(data, 1), block_size)
-
-    output1 = valloc(T, div(32, sizeof(T)), length(data))
-    output1 .= data
-    sort_blocks!(output1, Val(L), Val(N))
-
-    output2 = valloc(T, div(32, sizeof(T)), length(data))
-    merge_blocks(output2, output1, Val(L2), Val(N2))
-    output2
-end

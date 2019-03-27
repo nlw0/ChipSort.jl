@@ -139,7 +139,7 @@ end
     end
 end
 
-function merge_ng(input_a::AbstractVector{T}, input_b::AbstractVector{T}, ::Val{V}, ::Val{Ja}, ::Val{Jb}) where {T,V,Ja,Jb}
+function merge_ng(input_a::AbstractVector{T}, input_b::AbstractVector{T}, Ja, Jb, ::Val{V}) where {T,V}
     pa = pointer(input_a, 1)
     pb = pointer(input_b, 1)
     output = valloc(T, div(32,sizeof(T)), V*(Ja+Jb))
@@ -177,3 +177,60 @@ function merge_ng(input_a::AbstractVector{T}, input_b::AbstractVector{T}, ::Val{
     pout += V*sizeof(T)
     output
 end
+
+# function merge_ng2(
+#     ::Val{V},
+#     pout::Pointer{T},
+#     pin::Pointer{T},
+#     indices::Array{Int, 2}
+# ) where {T,V}
+
+#     pinc = V*sizeof(T)
+
+#     vecs = Array{Vec{V,T}}(undef, lenght(indices) * 2)
+#     nlists = size(indices, 2)
+
+#     for i in 1:nlists
+#         vecs[i] = vloada(Vec{V,T}, pin + pinc*indices[i,1])
+#         indices[i,1] += 1
+#     end
+
+#     for level ∈ 2:mylog(nlists)
+#         for j in 1:nmrg
+
+#         end
+#     end
+
+
+#     for i in 1:nlists>>1
+#         smaller = if vecs[i*2-1][1] < vecs[i*2][1] i*2-1 else i*2 end
+#         vecs[nlists+i] = vecs[smaller][1]
+#         vloada(Vec{V,T}, pin + pinc*indices[smaller,1])
+#         indices[smaller,1] += 1
+#     end
+
+#     for i in 1:nlists>>1
+#         smaller = if vecs[i*2-1][1] < vecs[i*2][1] i*2-1 else i*2 end
+#         vecs[nlists+i] = vecs[smaller][1]
+#         vloada(Vec{V,T}, pin + pinc*indices[smaller,1])
+#         indices[smaller,1] += 1
+#     end
+
+#     state1234 =
+
+#     for it in 1:(Ja+Jb-1)
+#         if pa>enda || pb<=endb && vb[1] < va[1]
+#             va,vb,pa,pb,enda,endb = vb,va,pb,pa,endb,enda
+#         end
+#         # @show it, enda-pa, endb-pb
+#         # @show it, state, va,vb
+#         out, state = bitonic_merge(state, va)
+#         va = vload(Vec{V,T}, pa)
+#         pa += pinc
+#         vstore(out, pout)
+#         pout += pinc
+#     end
+#     vstore(state, pout)
+#     pout += pinc
+#     output
+# end
