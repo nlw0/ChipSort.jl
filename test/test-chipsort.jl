@@ -22,9 +22,9 @@ ref = sort(data)
 # @test combsort!(copy(data)) == ref
 # @test combsort!(data, 2^6) == ref
 
-data = randa(Int32, 2^6)
+data = randa(Int32, 2^20)
 ref = sort(data)
-@test chipsort_merge_medium(data,Val(8),Val(1),Val(8)) == ref
+@test chipsort_large(data,Val(8),Val(32)) == ref
 
 data = tuple((Vec(tuple(sort(randa(Int8,8))...)) for _ in 1:4)...)
 stream_to_array(data) = [k[i] for k in data for i in 1:length(k)][:]

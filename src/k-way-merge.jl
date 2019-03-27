@@ -95,31 +95,3 @@ end
     end
     out
 end
-
-
-include("../test/testutils.jl")
-
-# T = Int8;V = 4;J = 4; K=4
-# T = Int16;V = 8;J = 4;K = 8
-# T = Int32;V = 8;J = 2^12; K = 32
-T = Int32;V = 8;J = 2^12; K = 32
-# T = UInt32;V = 32;J = 8; K = 128
-# T = Float32;V = 32;J = 16; K = 8
-# T = Float64;V = 4;J = 8;K = 8
-# T = UInt64;V = 16; J = 128; K = 32
-
-len=V*J*K
-display(@benchmark sort(data) setup=(data = randa($T, $len)))
-display(@benchmark chipsort_large(data, Val(V), Val(K))  setup=(data = randa($T, $len)))
-
-using Profile
-data = randa(T, len)
-@profile for j in 1:100
-    data = randa(T, len)
-    chipsort_large(data, Val(V), Val(K))
-end
-Profile.print(maxdepth=8)
-
-# @code_native debuginfo=:none chipsort_large(data, Val(V), Val(K))
-# @code_warntype pop!(ds, 1)
-# @code_native debuginfo=:none pop!(ds, 1)
