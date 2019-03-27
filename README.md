@@ -41,9 +41,9 @@ julia> y = transpose_vecs(x...)
 julia> z = merge_vecs(y...)
 <16 x Int8>[-112, -111, -85, -44, -28, -18, -15, -14, -12, -3, 5, 47, 79, 85, 98, 98]
 
-julia> bigdata = rand(Int16, 256);
+julia> bigdata = rand(Int32, 2^20);
 
-julia> chipsort(bigdata, Val(8), Val(8), Val(8)) == sort(bigdata)
+julia> chipsort_large(bigdata, Val(8), Val(32)) == sort(bigdata)
 true
 ```
 
