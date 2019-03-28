@@ -25,25 +25,27 @@ SUITE["Array8kInt32"]["CombSort"] = @benchmarkable combsort!(data) setup=(data =
 SUITE["Array8kInt32"]["InsertionSort"] = @benchmarkable insertion_sort!(data) setup=(data = randa($T, $len))
 
 
-multi_sort!(data) = for n in 1:128
+Km=2^5
+Vm=2^3
+Jm=36
+vj=Vm*Jm
+multi_sort!(data) = for n in 1:Km
     sort!(@view data[:,n])
 end
-multi_chipsort_small!(data) = for n in 1:128
+multi_chipsort_small!(data) = for n in 1:Km
     chipsort_small!((@view data[:,n]), Val(8), Val(8))
 end
-multi_combsort!(data) = for n in 1:128
+multi_combsort!(data) = for n in 1:Km
     combsort!(@view data[:,n])
 end
-multi_insertion_sort!(data) = for n in 1:128
+multi_insertion_sort!(data) = for n in 1:Km
     insertion_sort!(@view data[:,n])
 end
-
-vj=V*J
-SUITE["Array128x64Int32"] = BenchmarkGroup(["size-small", "Int32"])
-SUITE["Array128x$vj$T"]["JuliaStd"] = @benchmarkable multi_sort!(data) setup=(data = randa($T, $vj,$K))
-SUITE["Array128x$vj$T"]["ChipSort"] = @benchmarkable multi_chipsort_small!(data) setup=(data = randa($T, $vj,$K))
-SUITE["Array128x$vj$T"]["CombSort"] = @benchmarkable multi_combsort!(data) setup=(data = randa($T, $vj,$K))
-SUITE["Array128x$vj$T"]["InsertionSort"] = @benchmarkable multi_insertion_sort!(data) setup=(data = randa($T, $vj,$K))
+SUITE["Array128x$vj$T"] = BenchmarkGroup(["size-small", "Int32"])
+SUITE["Array128x$vj$T"]["JuliaStd"] = @benchmarkable multi_sort!(data) setup=(data = randa($T, $vj, $Km))
+SUITE["Array128x$vj$T"]["ChipSort"] = @benchmarkable multi_chipsort_small!(data) setup=(data = randa($T, $vj, $Km))
+SUITE["Array128x$vj$T"]["CombSort"] = @benchmarkable multi_combsort!(data) setup=(data = randa($T, $vj, $Km))
+SUITE["Array128x$vj$T"]["InsertionSort"] = @benchmarkable multi_insertion_sort!(data) setup=(data = randa($T, $vj, $Km))
 
 
 T=Int32
