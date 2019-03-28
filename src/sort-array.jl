@@ -70,16 +70,3 @@ function sort_vecs!(input::AbstractVector{T}, ::Val{J}, ::Val{V}, ::Val{Transpos
     end
     input
 end
-
-function merge_blocks(output, data, ::Val{L}, ::Val{N}) where {L,N}
-    blocks = reshape((@view data[:]), L*N, :)
-    M = div(length(data), L*N)
-
-    merger = build_multi_merger(Val(N), ntuple(m->(@view blocks[:, m]), M)...)
-
-    for itr in 1:L*M
-        new_buffer = pop!(merger)
-        vstorent(new_buffer, output, 1 + (itr-1)*N)
-    end
-    output
-end
