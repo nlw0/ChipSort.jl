@@ -41,7 +41,7 @@ function vectorized_combsort!(input::AbstractArray{T,1}, ::Val{V}) where {T,V}
 
     interval = 3 * div(la, 32) * 8
 
-    logV = vallog(Val(V))
+    logV = mylog(V)
     interval = (la >> (2+logV)) * (3 * V)
 
     while interval > 0
