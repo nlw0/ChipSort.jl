@@ -45,8 +45,8 @@ To find out more about the performance gains ChipSort can provide, check our [be
 ### Scientific publications
 
 - [_Efficient Implementation of Sorting on Multi-Core SIMD CPU Architecture_](http://www.vldb.org/pvldb/1/1454171.pdf), Jatin Chhugani et al. (2008)
-- [_SIMD- and Cache-Friendly Algorithm for Sorting an Array of Structures_](http://www.vldb.org/pvldb/vol8/p1274-inoue.pdf), Hiroshi Inoue and Kenjiro Taura (2007)
 - [_Multi-Core, Main-Memory Joins: Sort vs. Hash Revisited_](http://www.vldb.org/pvldb/vol7/p85-balkesen.pdf), Cagri Balkesen et al. (2014)
+- [_SIMD- and Cache-Friendly Algorithm for Sorting an Array of Structures_](http://www.vldb.org/pvldb/vol8/p1274-inoue.pdf), Hiroshi Inoue and Kenjiro Taura (2015)
 
 ### Related packages
 
