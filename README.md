@@ -9,6 +9,7 @@ ChipSort is a sorting module containing SIMD and cache-aware techniques. It's ba
 [![docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://nlw0.github.io/ChipSort.jl/dev)
 [![travis](https://travis-ci.org/nlw0/ChipSort.jl.svg?branch=master)](https://travis-ci.org/nlw0/ChipSort.jl)
 [![codecov](https://codecov.io/gh/nlw0/ChipSort.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/nlw0/ChipSort.jl)
+[![DOI](https://zenodo.org/badge/170022251.svg)](https://zenodo.org/badge/latestdoi/170022251)
 
 ## Installation and usage
 
