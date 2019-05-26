@@ -229,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "API",
     "title": "ChipSort.transpose!",
     "category": "method",
-    "text": "In-place transpose of a 3 dimensianal array VKJ into VJK.\n\n\n\n\n\n"
+    "text": "In-place transpose of a 3 dimensional array VKJ into VJK.\n\n\n\n\n\n"
 },
 
 {
