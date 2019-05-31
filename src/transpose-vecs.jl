@@ -15,7 +15,7 @@ function transpose_blocks!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T
     data
 end
 
-"""In-place transpose of a 3 dimensianal array VKJ into VJK."""
+"""In-place transpose of a 3 dimensional array VKJ into VJK."""
 @generated function transpose!(data::AbstractVector{T}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
     seeds = find_transpose_cycles(Val(K), Val(J))
     :(transpose!(data, Val(V), Val(J), Val(K), $seeds))
