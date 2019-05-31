@@ -7,7 +7,7 @@ export
     transpose_vecs, transpose_blocks!, transpose_vecs_tall, transpose_vecs_wide, transpose!,
     bitonic_merge, merge_vecs, build_multi_merger, bitonic_merge_interleaved, chipsort_merge_medium,
     DataBuffer, MergeNode, pop!,
-    combsort!, insertion_sort!,
+    combsort!, insertion_sort!, combsort_mix!,
     sort_blocks!, sort_vecs!
 
 include("utils.jl")

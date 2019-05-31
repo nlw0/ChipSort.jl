@@ -47,7 +47,7 @@ function sort_vecs!(input::AbstractVector{T}, ::Val{J}, ::Val{V}, ::Val{Transpos
     num_blocks = div(length(input), block_size)
 
     for m in 1:num_blocks
-        block = ntuple(j->vload(Vec{V, T}, input, 1 + (m-1)*block_size + (j-1)*V), J)
+        block = ntuple(j->vload(Vec{V, T}, input, 1 + (m-1)*block_size + (j-1)*V), Val(J))
         sorted_vecs = if Merge
             merge_vecs(transpose_vecs(sort_net(block...)...)...)
         elseif Transpose
@@ -57,14 +57,14 @@ function sort_vecs!(input::AbstractVector{T}, ::Val{J}, ::Val{V}, ::Val{Transpos
         end
 
         if Merge
-            vstorent(sorted_vecs, input, 1 + (m-1)*(V*J))
+            vstore(sorted_vecs, input, 1 + (m-1)*(V*J))
         elseif Transpose
             for v in 1:V
-                vstorent(sorted_vecs[v], input, 1 + (m-1)*(V*J) + (v-1)*J)
+                vstore(sorted_vecs[v], input, 1 + (m-1)*(V*J) + (v-1)*J)
             end
         else
             for j in 1:J
-                vstorent(sorted_vecs[j], input, 1 + (m-1)*(V*J) + (j-1)*V)
+                vstore(sorted_vecs[j], input, 1 + (m-1)*(V*J) + (j-1)*V)
             end
         end
     end

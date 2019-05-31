@@ -6,7 +6,7 @@ function transpose_blocks!(data::AbstractVector{T}, ::Val{V}, ::Val{J}) where {T
     num_blocks = div(length(data), block_size)
 
     for k in 1:num_blocks
-        block = ntuple(l->vload(Vec{V, T}, data, 1 + (k-1)*block_size + (l-1)*V), J)
+        block = ntuple(l->vload(Vec{V, T}, data, 1 + (k-1)*block_size + (l-1)*V), Val(J))
         transposed_block = transpose_vecs(block...)
         for v in 1:V
             vstore(transposed_block[v], data, 1 + (k-1)*block_size + (v-1)*J)
@@ -69,8 +69,8 @@ Transposes a matrix of L vectors of size N into N vectors of size L. Sizes shoul
 
     ex = Expr[Expr(:meta, :inline)]
 
-    pa = Val{ntuple(a->((a-1)*N)%(2*N-1), N)}
-    pb = Val{ntuple(a->div(N,2)+((a-1)*N)%(2*N-1), N)}
+    pa = Val{ntuple(a->((a-1)*N)%(2*N-1), Val(N))}
+    pb = Val{ntuple(a->div(N,2)+((a-1)*N)%(2*N-1), Val(N))}
 
     for t in 1:L
         a1 = Symbol("input_", 0, "_", t)
@@ -106,7 +106,7 @@ Transposes a matrix of L vectors of size N into N vectors of size L. Sizes shoul
             end
         end
 
-        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps+outsteps, "_", t), N)...))
+        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps+outsteps, "_", t), Val(N))...))
 
     elseif N > L
 
@@ -123,11 +123,11 @@ Transposes a matrix of L vectors of size N into N vectors of size L. Sizes shoul
             end
         end
 
-        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps+outsteps, "_", t), N)...))
+        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps+outsteps, "_", t), Val(N))...))
 
     else
 
-        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), L)...))
+        push!(ex, Expr(:tuple, ntuple(t->Symbol("input_", nsteps, "_", t), Val(L))...))
 
     end
 

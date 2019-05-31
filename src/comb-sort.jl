@@ -120,3 +120,28 @@ function combsort!(input::AbstractArray{T,1}, initial_interval=nothing::Union{No
 
     input
 end
+
+"""Regular version of Comb sort."""
+function combsort_mix!(input::AbstractArray{T,1}, initial_interval=nothing::Union{Nothing,Int}) where T
+
+    la = length(input)
+    interval = if (initial_interval == nothing)
+        (3 * la) >> 2
+    else
+        initial_interval
+    end
+
+    @inbounds while interval > 1
+        for i in 1:la-interval
+            a1 = input[i]
+            a2 = input[i+interval]
+            input[i] = min(a1, a2)
+            input[i+interval] = max(a1, a2)
+        end
+        interval = (3 * interval) >> 2
+    end
+
+    insertion_sort!(input)
+
+    input
+end

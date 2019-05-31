@@ -9,7 +9,7 @@ function chipsort_merge_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::
         sort_blocks!(output, Val(J), Val(V))
     else
         for cc in 1:K
-            block = ntuple(v->input[v+(cc-1)*V], V)
+            block = ntuple(v->input[v+(cc-1)*V], Val(V))
             srt = Vec(sort_net(block...)) ::Vec{V*J,T}
             vstorea(srt, output, 1+(cc-1)*V*J)
         end
