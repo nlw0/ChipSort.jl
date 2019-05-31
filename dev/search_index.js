@@ -177,6 +177,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#ChipSort.chipsort_serial!-Union{Tuple{AbstractArray{T,1}}, Tuple{T}, Tuple{AbstractArray{T,1},Any}} where T",
+    "page": "API",
+    "title": "ChipSort.chipsort_serial!",
+    "category": "method",
+    "text": "Regular version of Comb sort.\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#ChipSort.chipsort_small!-Union{Tuple{J}, Tuple{V}, Tuple{T}, Tuple{AbstractArray{T,1},Val{V},Val{J}}} where J where V where T",
     "page": "API",
     "title": "ChipSort.chipsort_small!",
@@ -188,14 +196,6 @@ var documenterSearchIndex = {"docs": [
     "location": "api/#ChipSort.combsort!-Union{Tuple{AbstractArray{T,1}}, Tuple{T}, Tuple{AbstractArray{T,1},Any}} where T",
     "page": "API",
     "title": "ChipSort.combsort!",
-    "category": "method",
-    "text": "Regular version of Comb sort.\n\n\n\n\n\n"
-},
-
-{
-    "location": "api/#ChipSort.combsort_mix!-Union{Tuple{AbstractArray{T,1}}, Tuple{T}, Tuple{AbstractArray{T,1},Any}} where T",
-    "page": "API",
-    "title": "ChipSort.combsort_mix!",
     "category": "method",
     "text": "Regular version of Comb sort.\n\n\n\n\n\n"
 },
