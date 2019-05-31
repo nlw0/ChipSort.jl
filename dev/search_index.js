@@ -169,19 +169,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#ChipSort.chipsort!-Union{Tuple{AbstractArray{T,1}}, Tuple{T}, Tuple{AbstractArray{T,1},Any}} where T",
+    "page": "API",
+    "title": "ChipSort.chipsort!",
+    "category": "method",
+    "text": "Regular Comb sort followed by Insertion sort when the interval becomes 1.\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#ChipSort.chipsort_medium!-Union{Tuple{K}, Tuple{J}, Tuple{V}, Tuple{T}, Tuple{AbstractArray{T,1},Val{V},Val{J},Val{K}}} where K where J where V where T",
     "page": "API",
     "title": "ChipSort.chipsort_medium!",
     "category": "method",
     "text": "chipsort_medium!(data, Val(V), Val(J), Val(K))\n\nSort a medium array in-place. The data is divided between K blocks of J SIMD vectors of size V. The array should typically fit inside lower levels of cache memory (L1 or L2), for instance 8192 Int32 values on an conventional desktop computer. Our recipe is:\n\nGenerate small sorted vectors.\nUse vectorized Comb sort.\nTranspose in-place.\nFinish with insertion sort over the nearly sorted array.\n\nExamples\n\njulia> chipsort_medium!(Int32[1:2^13...] .* 0xf0ca .%0x10000, Val(8), Val(8), Val(64))\'\n1×8192 LinearAlgebra.Adjoint{Int32,Array{Int32,1}}:\n 30  32  34  36  38  70  72  74  76  108  110  112  114  116  …  65488  65490  65492  65494  65496  65528  65530  65532  65534\n\n\n\n\n\n"
-},
-
-{
-    "location": "api/#ChipSort.chipsort_serial!-Union{Tuple{AbstractArray{T,1}}, Tuple{T}, Tuple{AbstractArray{T,1},Any}} where T",
-    "page": "API",
-    "title": "ChipSort.chipsort_serial!",
-    "category": "method",
-    "text": "Regular version of Comb sort.\n\n\n\n\n\n"
 },
 
 {
