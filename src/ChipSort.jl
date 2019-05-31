@@ -2,7 +2,7 @@ module ChipSort
 import Base.pop!
 
 export
-    chipsort_small!, chipsort_medium!, chipsort_large, chipsort_serial!,
+    chipsort_small!, chipsort_medium!, chipsort_large, chipsort!,
     sort_net,
     transpose_vecs, transpose_blocks!, transpose_vecs_tall, transpose_vecs_wide, transpose!,
     bitonic_merge, merge_vecs, build_multi_merger, bitonic_merge_interleaved, chipsort_merge_medium,

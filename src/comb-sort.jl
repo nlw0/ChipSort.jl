@@ -121,8 +121,8 @@ function combsort!(input::AbstractArray{T,1}, initial_interval=nothing::Union{No
     input
 end
 
-"""Regular version of Comb sort."""
-function chipsort_serial!(input::AbstractArray{T,1}, initial_interval=nothing::Union{Nothing,Int}) where T
+"""Regular Comb sort followed by Insertion sort when the interval becomes 1."""
+function chipsort!(input::AbstractArray{T,1}, initial_interval=nothing::Union{Nothing,Int}) where T
 
     la = length(input)
     interval = if (initial_interval == nothing)
