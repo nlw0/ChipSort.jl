@@ -193,6 +193,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "api/#ChipSort.combsort_mix!-Union{Tuple{AbstractArray{T,1}}, Tuple{T}, Tuple{AbstractArray{T,1},Any}} where T",
+    "page": "API",
+    "title": "ChipSort.combsort_mix!",
+    "category": "method",
+    "text": "Regular version of Comb sort.\n\n\n\n\n\n"
+},
+
+{
     "location": "api/#ChipSort.insertion_sort!-Tuple{AbstractArray{T,1} where T}",
     "page": "API",
     "title": "ChipSort.insertion_sort!",
