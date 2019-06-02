@@ -50,4 +50,4 @@ true
 
 Make sure you check [our documentation](https://nlw0.github.io/ChipSort.jl) for more information.
 
-Latest [benchmark](https://gist.github.com/nlw0/03d5d652cde609e3568cc8b69a12062e) results are: 81% speedup on a 1M Int32 array, 2x speedup on 8k Int32 and 17x on 64 values.
+Latest [benchmark](https://gist.github.com/nlw0/a4180e7d131bf127cd738f5ad2da284c) results are: 81% speedup on a 1M Int32 array, 2x speedup on 8k Int32 and 4x on 64 values.

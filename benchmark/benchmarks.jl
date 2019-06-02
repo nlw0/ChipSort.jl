@@ -26,8 +26,8 @@ SUITE["Array8kInt32"]["InsertionSort"] = @benchmarkable insertion_sort!(data) se
 
 
 Km=2^5
-Vm=2^3
-Jm=36
+Vm=8
+Jm=8
 vj=Vm*Jm
 multi_sort!(data) = for n in 1:Km
     sort!(@view data[:,n])
