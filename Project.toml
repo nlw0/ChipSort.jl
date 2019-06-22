@@ -1,6 +1,6 @@
 name = "ChipSort"
 uuid = "06416c39-db7e-5258-b068-33480f0cdbbc"
-authors = ["nic <nwerneck@gmail.com>"]
+authors = ["Nicolau Leal Werneck <nwerneck@gmail.com>"]
 version = "0.1.0"
 
 [deps]
