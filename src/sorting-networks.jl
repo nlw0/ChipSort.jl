@@ -8,8 +8,11 @@ include("sorting-network-parameters.jl")
 
 Applies a sorting network of size L to the input elements, returning a sorted tuple.
 
-The elements must support the `min` and `max` functions. In the case of `SIMD.Vec` objects each "lane" across the vectors will be sorted. Therefore with L vectors of size N this function will produce N sorted sequences of size L, after the data is transposed (see transpose_vecs).
+The elements must support the `min` and `max` functions. In the case of `SIMD.Vec` objects each "lane" across the
+vectors will be sorted. Therefore with L vectors of size N this function will produce N sorted sequences of size L,
+after the data is transposed (see transpose_vecs).
 """
+
 @generated function sort_net(input::Vararg{T, L})::NTuple{T, L} where {L,T}
 
     ex = Expr[Expr(:meta, :inline)]
@@ -24,18 +27,17 @@ The elements must support the `min` and `max` functions. In the case of `SIMD.Ve
     end
 
     for st in 1:nsteps
-
         touched = [x for t in net_params[st] for x in t]
         untouched = setdiff(1:L, touched)
 
         for t in untouched
-            a1 = Symbol("input_", st-1, "_", t)
-            b1 = Symbol("input_", st, "_", t)
+            a1 = Symbol("input_",st-1, "_", t)
+            b1 = Symbol("input_",st, "_", t)
             push!(ex, :($b1 = $a1))
         end
 
         for t in net_params[st]
-            a1 = Symbol("input_", st-1, "_", t[1])
+            a1 = Symbol("input_",st-1, "_", t[1])
             a2 = Symbol("input_", st-1, "_", t[2])
             b1 = Symbol("input_", st, "_", t[1])
             b2 = Symbol("input_", st, "_", t[2])
