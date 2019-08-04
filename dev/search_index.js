@@ -217,14 +217,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "api/#ChipSort.sort_net-Union{Tuple{Vararg{T,L}}, Tuple{T}, Tuple{L}} where T where L",
-    "page": "API",
-    "title": "ChipSort.sort_net",
-    "category": "method",
-    "text": "sort_net(input::Vararg{T, L}) where {L,T}\n\nApplies a sorting network of size L to the input elements, returning a sorted tuple.\n\nThe elements must support the min and max functions. In the case of SIMD.Vec objects each \"lane\" across the vectors will be sorted. Therefore with L vectors of size N this function will produce N sorted sequences of size L, after the data is transposed (see transpose_vecs).\n\n\n\n\n\n"
-},
-
-{
     "location": "api/#ChipSort.sort_vecs!-Union{Tuple{Merge}, Tuple{Transpose}, Tuple{T}, Tuple{J}, Tuple{V}, Tuple{AbstractArray{T,1},Val{J},Val{V}}, Tuple{AbstractArray{T,1},Val{J},Val{V},Val{Transpose}}, Tuple{AbstractArray{T,1},Val{J},Val{V},Val{Transpose},Val{Merge}}} where Merge where Transpose where T where J where V",
     "page": "API",
     "title": "ChipSort.sort_vecs!",
