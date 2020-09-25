@@ -69,8 +69,8 @@ Transposes a matrix of L vectors of size N into N vectors of size L. Sizes shoul
 
     ex = Expr[Expr(:meta, :inline)]
 
-    pa = Val{ntuple(a->((a-1)*N)%(2*N-1), Val(N))}
-    pb = Val{ntuple(a->div(N,2)+((a-1)*N)%(2*N-1), Val(N))}
+    pa = Val(ntuple(a->((a-1)*N)%(2*N-1), Val(N)))
+    pb = Val(ntuple(a->div(N,2)+((a-1)*N)%(2*N-1), Val(N)))
 
     for t in 1:L
         a1 = Symbol("input_", 0, "_", t)
@@ -97,7 +97,7 @@ Transposes a matrix of L vectors of size N into N vectors of size L. Sizes shoul
 
         outsteps = mylog(div(L,N))
         for st in 1:outsteps
-            pcat = Val{ntuple(a->a-1, N*2^st)}
+            pcat = Val(ntuple(a->a-1, N*2^st))
             for t in 1:N*2^(outsteps-st)
                 a1 = Symbol("input_", nsteps+st-1, "_", t*2-1)
                 a2 = Symbol("input_", nsteps+st-1, "_", t*2)
@@ -112,8 +112,8 @@ Transposes a matrix of L vectors of size N into N vectors of size L. Sizes shoul
 
         outsteps = mylog(div(N,L))
         for st in 1:outsteps
-            pleft = Val{ntuple(a->a-1, div(N,2^st))}
-            pright = Val{ntuple(a->a-1+div(N,2^st), div(N,2^st))}
+            pleft = Val(ntuple(a->a-1, div(N,2^st)))
+            pright = Val(ntuple(a->a-1+div(N,2^st), div(N,2^st)))
             for t in 1:L*2^(st-1)
                 a1 = Symbol("input_", nsteps+st-1, "_", t)
                 b1 = Symbol("input_", nsteps+st, "_", t*2-1)
