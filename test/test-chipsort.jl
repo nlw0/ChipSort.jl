@@ -23,6 +23,10 @@ ref = sort(data)
 
 data = randa(Int32, 2^7)
 ref = sort(data)
+@test chipsort!(data, 2^6) == ref
+
+data = randa(Int32, 2^7)
+ref = sort(data)
 @test insertion_sort!(data) == ref
 
 end

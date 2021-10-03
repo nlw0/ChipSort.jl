@@ -2,7 +2,7 @@ using SIMD
 
 
 function chipsort_merge_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::Val{K}) where {T,V,J,K}
-    output = valloc(T, div(32,sizeof(T)), V*J*K)
+    output = valloc(T, 64, V*J*K)
 
     if J>1
         output .= input
@@ -22,7 +22,7 @@ function chipsort_merge_medium(input::AbstractArray{T,1}, ::Val{V}, ::Val{J}, ::
 
     do_merge_pass(
         new_input,
-        reshape(valloc(T, div(32,sizeof(T)), V*J*K), V, J<<1, K>>1),
+        reshape(valloc(T, 64, V*J*K), V, J<<1, K>>1),
         blocks_a, blocks_b,
         Val(V), Val(J<<1), Val(K>>1)
     )
