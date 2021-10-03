@@ -3,11 +3,11 @@ uuid = "06416c39-db7e-5258-b068-33480f0cdbbc"
 authors = ["Nicolau Leal Werneck <nwerneck@gmail.com>"]
 version = "0.1.0"
 
-[compat]
-julia = "1"
-
 [deps]
 SIMD = "fdea26ae-647d-5447-a871-4b548cad5224"
+
+[compat]
+julia = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
