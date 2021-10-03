@@ -82,7 +82,7 @@ end
 @testset "Basic bitonic merge interleaved" begin
     for T in [Int8, Int32, Float64]
         for V in 2 .^ (2:3)
-            for J in [2,8]
+            for J in [1,2,8]
                 for K in [2,4]
                     test_merge_interleaved(T,V,J,K)
                 end
