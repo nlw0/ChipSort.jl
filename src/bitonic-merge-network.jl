@@ -11,7 +11,7 @@ Merges two `SIMD.Vec` objects of the same type and size using a bitonic sort net
 """
 @generated function bitonic_merge(input_a::Vec{N,T}, input_b::Vec{N,T}) where {N,T}
 
-    pat = Val{ntuple(x->N-x, N)}
+    pat = Val(ntuple(x->N-x, N))
 
     ex = [
         Expr(:meta, :inline),
@@ -32,8 +32,8 @@ Merges two `SIMD.Vec` objects of the same type and size using a bitonic sort net
 
         ih = inverse_shuffle(bitonic_step(2^(n), 2^(p-n+1)))
         sh = bitonic_step(2^(n+1), 2^(p-n))
-        pat_a = Val{tuple((ih[sh[1:N]].-1)...)}
-        pat_b = Val{tuple((ih[sh[(N+1):end]].-1)...)}
+        pat_a = Val(tuple((ih[sh[1:N]].-1)...))
+        pat_b = Val(tuple((ih[sh[(N+1):end]].-1)...))
 
         append!(ex, [
             :($la = shufflevector($Lp, $Hp, $pat_a)),
@@ -49,8 +49,8 @@ Merges two `SIMD.Vec` objects of the same type and size using a bitonic sort net
     Hp = Symbol("H_", p)
 
     ih = inverse_shuffle(bitonic_step(2N, 1))
-    pat_a = Val{tuple((ih[1:N].-1)...)}
-    pat_b = Val{tuple((ih[(N+1):end].-1)...)}
+    pat_a = Val(tuple((ih[1:N].-1)...))
+    pat_b = Val(tuple((ih[(N+1):end].-1)...))
 
     append!(ex, [
         :($la = shufflevector($Lp, $Hp, $pat_a)),
@@ -128,7 +128,7 @@ Merges K pairs of vectors using a bitonic sort network, with interleaved executi
     allex = []
     for indy in 1:K
         iSymbol(x...) = Symbol("indy_", indy, "_", x...)
-        pat = Val{ntuple(x->V-x, V)}
+        pat = Val(ntuple(x->V-x, V))
 
         n = 0
         la = iSymbol("la_", n)
@@ -153,8 +153,8 @@ Merges K pairs of vectors using a bitonic sort network, with interleaved executi
 
             ih = inverse_shuffle(bitonic_step(2^(n), 2^(p-n+1)))
             sh = bitonic_step(2^(n+1), 2^(p-n))
-            pat_a = Val{tuple((ih[sh[1:V]].-1)...)}
-            pat_b = Val{tuple((ih[sh[(V+1):end]].-1)...)}
+            pat_a = Val(tuple((ih[sh[1:V]].-1)...))
+            pat_b = Val(tuple((ih[sh[(V+1):end]].-1)...))
 
             append!(ex, [
                 :($la = shufflevector($Lp, $Hp, $pat_a)),
@@ -170,8 +170,8 @@ Merges K pairs of vectors using a bitonic sort network, with interleaved executi
         Hp = iSymbol("H_", p)
 
         ih = inverse_shuffle(bitonic_step(2V, 1))
-        pat_a = Val{tuple((ih[1:V].-1)...)}
-        pat_b = Val{tuple((ih[(V+1):end].-1)...)}
+        pat_a = Val(tuple((ih[1:V].-1)...))
+        pat_b = Val(tuple((ih[(V+1):end].-1)...))
 
         append!(ex, [
             :(vstorea(shufflevector($Lp, $Hp, $pat_a), pointer(@view output[:,J,$indy]))),
