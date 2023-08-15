@@ -33,7 +33,7 @@ struct VecMergeTree{A<:AbstractVector, B<:AbstractMatrix, C<:AbstractMatrix, T,V
     ranges::C
     over::Vector{Bool}
 
-    function VecMergeTree(data::AbstractVector{T}, ::Val{V},::Val{K}) where {T,V,K,I}
+    function VecMergeTree(data::AbstractVector{T}, ::Val{V},::Val{K}) where {T,V,K}
         cache = reshape(valloc(T, div(32, sizeof(T)), V*(2*K-1)), V, 2*K-1)
         J = div(length(data), V*K)
         ranges = copy(reshape([1:J:K*J; J:J:K*J+J-1],:,2)')
